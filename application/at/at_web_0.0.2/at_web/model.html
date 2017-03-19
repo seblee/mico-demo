@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+	<script type="text/javascript" src="model$.js"></script>
+<style>
+
+	.in_body {
+		margin-top: 0px;
+		margin-left: 0px;
+		margin-right: 0px;
+		margin-bottom: 0px;
+		background-color: transparent;
+	}
+
+	.div_c {
+		margin-left: 50px;
+		margin-right: 50px;
+		margin-top: 30px;
+		margin-bottom: 20px;
+	}
+
+	.label1 {
+		float: left;
+		margin-left: 52px;
+		width: 50%;
+		color: #000000;
+		margin-bottom: -2px;
+		font-size: 15px;
+	}
+
+	.lab_4 {
+
+		color: #000000;
+		font-size: 13px;
+	}
+
+	.cl {
+		clear: left;
+	}
+
+	.line1 {
+		height: 1px;
+		background-color: #000000;
+		width: 82%;
+		margin-left: 52px;
+		margin-top: 5px;
+		margin-bottom: 5px;
+		overflow: hidden;
+	}
+
+	.btn {
+		width: 66px;
+		height: 27px;
+		border-style: none;
+		border-radius: 3px 3px 3px 3px;
+		font-size: 14px;
+		font-weight: bold;
+		background-color: #6699FF;
+		color: #000000;
+		cursor: pointer;
+	}
+
+	.sp_120 {
+		width:10px;
+		height:50px;
+	}
+
+	.label {
+		float:left;
+		width:50%;
+		color:#000000;
+		margin-bottom:-2px;
+		font-size:15px;
+	}
+	.items {
+		color:#000000;
+		margin-left:10px;
+		font-size:15px;
+	}
+
+</style>
+</head>
+<body class="in_body" onload="init_user_setting(); init_model_ver(); init_time_reboot_setting()">
+   
+   	<div class="div_c" style="display:none;font-family:微软雅黑" id="up_after">
+        <font class="items">升级模块固件版本 慎重升级</font>
+         <div class="sp_120"></div>
+		<div class="lab_4">文件正在上传中，请耐心等待...</div>
+		<div class="sp_120"></div>
+		<marquee style="margin-left:70px;solid #000000" direction="right" width="350" scrollamount="7" scrolldelay="20" bgcolor="#ECF2FF">
+			<table cellspacing="1" cellpadding="0">
+			<tr style="height:30px;">
+				<td bgcolor="#006699" width="12px"></td>
+				<td bgcolor="#006699" width="12px"></td>
+				<td bgcolor="#006699" width="12px"></td>
+			</tr>
+			</table>
+		</marquee>
+	</div>
+
+    <div class="div_c" style="font-family:微软雅黑" id="up_before">
+
+		<form name="form_user_setting" method="post" action="config_success.html">
+			<div class="cl"></div>
+			<div style="height:10px;"></div>
+			<div class="label" style="font-weight:bold;font-size:17px">管理者设置</div>
+			<div class="cl"></div>
+			<div style="height:20px;"></div>
+
+			<div class="lab_4">
+				<div class="label1">账号</div>
+				<div class="fw"><input name="user_name" id="user_name_id" type="text" style="width:162px"/></div>
+				<div class="cl"></div>
+				<div class="line1"></div>
+
+				<div class="label1">口令</div>
+				<div class="fw"><input name="user_key" id="user_key_id" type="text" style="width:162px"/></div>
+				<div class="cl"></div>
+				<div class="line1"></div>
+			</div>
+
+			<div style="margin-top:20px;color:#000000;width:100%;text-align:right">
+				<input onclick="user_setting_apply()" type="button" class="btn" value="保存"/>
+			</div>
+		</form>
+
+		<div class="cl"></div>
+		<div style="height:10px;"></div>
+		<div class="label" style="font-weight:bold;font-size:17px">模块版本信息</div>
+		<div class="cl"></div>
+		<div style="height:20px;"></div>
+
+		<div class="lab_4" id="module_ver_id">
+			<div class="label1">模块名称</div>
+			<div class="fw" id="model_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+
+			<div class="label1">MAC地址</div>
+			<div class="fw" id="mac_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+
+			<div class="label1">SDK版本</div>
+			<div class="fw" id="sdk_ver_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+
+			<div class="label1">软件版本</div>
+			<div class="fw" id="fw_ver_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+
+			<div class="label1">网页版本</div>
+			<div class="fw" id="web_ver_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+		</div>
+
+		<form name="form_time_reboot_setting" method="post" action="config_success.html">
+			<div class="cl"></div>
+			<div style="height:10px;"></div>
+			<div class="label" style="font-weight:bold;font-size:17px">定时重启设置</div>
+			<div class="cl"></div>
+			<div style="height:20px;"></div>
+
+			<div class="lab_4">
+				<div class="label1">定时重启模式</div>
+				<div class="tr">
+					<select style="width:160px;height:20px" name="reboot_mode" id="reboot_mode_id" onchange="time_reboot_change()">
+						<option value="disable">Disable</option>
+						<option value="enable">Enable</option>
+					</select>
+				</div>
+				<div class="cl"></div>
+				<div class="line1"></div>
+
+				<div class="label1">定时重启时间（s）</div>
+				<div class="fw"><input name="reboot_time" id="reboot_time_id" type="text" style="width:162px"/></div>
+				<div class="cl"></div>
+				<div class="line1"></div>
+
+				<div style="margin-top:20px;color:#000000;width:100%;text-align:right">
+					<input onclick="time_reboot_setting_apply()" type="button" class="btn" value="保存"/>
+				</div>
+			</div>
+		</form>
+
+		<form name="form_reboot_setting" method="post" action="reboot_success.html">
+			<div class="cl"></div>
+			<div style="height:10px;"></div>
+			<div class="label" style="font-weight:bold;font-size:17px">模块重启</div>
+			<div class="cl"></div>
+			<div style="height:20px;"></div>
+
+			<div class="lab_4">
+				<div class="label1">模块重启</div>
+				<div class="fw"><input onclick="reboot_setting_apply()" type="button" class="btn"  value="确认"/></div>
+				<div class="cl"></div>
+				<div class="line1"></div>
+			</div>
+		</form>
+
+		<form name="form_factory_setting" method="post" action="factory_success.html">
+			<div class="cl"></div>
+			<div style="height:10px;"></div>
+			<div class="label" style="font-weight:bold;font-size:17px">恢复出厂设置</div>
+			<div class="cl"></div>
+			<div style="height:20px;"></div>
+
+			<div class="lab_4">
+				<div class="label1">恢复出厂设置</div>
+				<div class="fw"><input onclick="factory_setting_apply()" type="button" class="btn" value="确认"/></div>
+				<div class="cl"></div>
+				<div class="line1"></div>
+			</div>
+		</form>
+
+         <form name= "form_ota" method="post" action="update_success.html" enctype="multipart/form-data">
+			 <div class="cl"></div>
+			 <div style="height:10px;"></div>
+			 <div class="label" style="font-weight:bold;font-size:17px">模块固件升级</div>
+			 <div class="cl"></div>
+			 <div style="height:20px;"></div>
+
+			 <div class="lab_4">
+			 	<div class="label1"><input name="ota_fw" type="file" size="5" value=""/></div>
+			 	<div><input onclick="apply()" type="button" class="btn" value="确认"/></div>
+			 </div>
+		</form>
+    </div>
+
+</body>
+</html>

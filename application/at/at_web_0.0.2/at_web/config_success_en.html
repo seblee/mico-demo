@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head> 
+<meta http-equiv="Content-Type" content="text/html" charset="gb2312">
+	<script type="text/javascript">
+		function reboot_setting_apply(){
+			var f=document.form_reboot_setting;
+			f.submit();
+		}
+	</script>
+<style>
+.div_c_w
+{
+	margin-left:50px;
+	margin-right:50px;
+	margin-top:50px;
+	margin-bottom:50px;
+	color:#000000;
+}
+.label1 {
+	float: left;
+	margin-left: 52px;
+	width: 50%;
+	color: #000000;
+	margin-bottom: -2px;
+	font-size: 15px;
+}
+.items
+{
+	color:#000000;
+	font-size:15px;
+}
+.lab_4 {
+
+	color: #000000;
+	font-size: 13px;
+}
+.sp_60
+{
+	width:10px;
+	height:60px;	
+}
+.btn {
+	width: 66px;
+	height: 27px;
+	border-style: none;
+	border-radius: 3px 3px 3px 3px;
+	font-size: 14px;
+	font-weight: bold;
+	background-color: #6699FF;
+	color: #000000;
+	cursor: pointer;
+}
+	.cl{
+		clear:left;
+		float: right;
+	}
+</style>
+</head>
+<body class="in_body">
+<div id="lang_cn_id" class="div_c_w" style="font-family:微软雅黑;font-size:13px;">
+    <div class="items" style="font-weight:bold;" >Parameter configuration success!</div>
+    <div class="sp_60"></div>
+
+	<form name="form_reboot_setting" method="post" action="reboot_success_en.html">
+		<div class="lab_4">
+			<div class="label1">Reboot module to take effect<br/> whether to restart the module?</div>
+			<div class="cl" ><input onclick="reboot_setting_apply()" type="button" class="btn"  value="yes"/></div>
+			<div class="cl"></div>
+		</div>
+	</form>
+
+</div>
+</body>
+</html>

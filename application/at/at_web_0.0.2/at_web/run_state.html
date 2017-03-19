@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head> 
+<meta http-equiv="refresh" content="10" charset="gb2312">
+	<script type="text/javascript" src="run_state$.js"></script>
+
+	  <style>
+
+	  .in_body {
+		  margin-top: 0px;
+		  margin-left: 0px;
+		  margin-right: 0px;
+		  margin-bottom: 0px;
+		  background-color: transparent;
+	  }
+
+	.div_c {
+		margin-left: 50px;
+		margin-right: 50px;
+		margin-top: 30px;
+		margin-bottom: 20px;
+	}
+
+	.label1 {
+		float: left;
+		margin-left: 52px;
+		width: 50%;
+		color: #000000;
+		margin-bottom: -2px;
+		font-size: 15px;
+	}
+
+	.lab_4 {
+
+		color: #000000;
+		font-size: 13px;
+	}
+
+	.cl {
+		clear: left;
+	}
+
+	.line1 {
+		height: 1px;
+		background-color: #000000;
+		width: 82%;
+		margin-left: 52px;
+		margin-top: 5px;
+		margin-bottom: 5px;
+		overflow: hidden;
+	}
+	.sp_120 {
+		width:10px;
+		height:50px;
+	}
+	.label {
+		float:left;
+		width:50%;
+		color:#000000;
+		margin-bottom:-2px;
+		font-size:15px;
+	}
+</style>
+</head>
+<body class="in_body" onload="init_run_state()">
+
+<div class="div_c" style="font-family:微软雅黑" id="run_state_id">
+	<div class="cl"></div>
+	<div style="height:10px;"></div>
+	<div class="label" style="font-weight:bold;font-size:17px">AP状态</div>
+	<div class="cl"></div>
+	<div style="height:20px;"></div>
+
+	<div class="lab_4">
+		<div class="label1">功能</div>
+		<div class="fw" id="ap_func_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">IP地址</div>
+		<div class="fw" id="ap_ip_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">子网掩码</div>
+		<div class="fw" id="ap_netmask_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+	</div>
+
+	<div class="cl"></div>
+	<div style="height:10px;"></div>
+	<div class="label" style="font-weight:bold;font-size:17px">STA状态</div>
+	<div class="cl"></div>
+	<div style="height:20px;"></div>
+
+	<div class="lab_4">
+		<div class="label1">功能</div>
+		<div class="fw" id="sta_func_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">信道</div>
+		<div class="fw" id="sta_ch_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">信号强度</div>
+		<div class="fw" id="sta_power_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">IP地址</div>
+		<div class="fw" id="sta_ip_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">子网掩码</div>
+		<div class="fw" id="sta_netmask_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">网关地址</div>
+		<div class="fw" id="sta_gateway_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+	</div>
+
+	<div class="cl"></div>
+	<div style="height:10px;"></div>
+	<div class="label" style="font-weight:bold;font-size:17px">命令模式状态</div>
+	<div class="cl"></div>
+	<div style="height:20px;"></div>
+
+	<div class="lab_4">
+		<div class="label1">功能</div>
+		<div class="fw" id="run_at_fun_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+	</div>
+
+	<div class="cl"></div>
+	<div style="height:10px;"></div>
+	<div class="label" style="font-weight:bold;font-size:17px">网络连接1状态</div>
+	<div class="cl"></div>
+	<div style="height:20px;"></div>
+
+	<div class="lab_4">
+		<div class="label1">功能</div>
+		<div class="fw" id="run_con1_fun_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">协议</div>
+		<div class="fw" id="con1_protocol_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div id = "con1_server_id">
+			<div class="label1">TCP 服务器连接数</div>
+			<div class="fw" id="run_t1s_num_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+		</div>
+
+		<div id = "con1_client_id">
+			<div class="label1">TCP 客户端是否连接</div>
+			<div class="fw" id="run_t1c_num_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+		</div>
+	</div>
+
+	<div class="cl"></div>
+	<div style="height:10px;"></div>
+	<div class="label" style="font-weight:bold;font-size:17px">网络连接2状态</div>
+	<div class="cl"></div>
+	<div style="height:20px;"></div>
+
+	<div class="lab_4">
+		<div class="label1">功能</div>
+		<div class="fw" id="run_con2_fun_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div class="label1">协议</div>
+		<div class="fw" id="con2_protocol_id" ></div>
+		<div class="cl"></div>
+		<div class="line1"></div>
+
+		<div id="con2_server_id">
+			<div class="label1">TCP 服务器连接数</div>
+			<div class="fw" id="run_t2s_num_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+		</div>
+
+		<div id="con2_client_id">
+			<div class="label1">TCP 客户端是否连接</div>
+			<div class="fw" id="run_t2c_num_id" ></div>
+			<div class="cl"></div>
+			<div class="line1"></div>
+		</div>
+
+		<div class="sp_120"></div>
+		<div class="label1">运行时间</div>
+		<div class="fw" id="run_time_id" ></div>
+	</div>
+</div>
+</body>
+</html>
+

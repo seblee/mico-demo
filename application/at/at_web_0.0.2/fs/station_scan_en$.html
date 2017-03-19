@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script language="JavaScript" type="text/javascript">
+
+function selectedSSIDChange(ssid,mode, auth)
+{
+    parent.set_value(ssid);
+}
+</script>
+
+</head>
+<body style="margin-top:0px;margin-left:0px;margin-right:0px;margin-bottom:0px;background-color:#FFFFFF">
+    <form method="post" name="sta_site_survey">
+      <table width="300" border="0" style="border-style:none;border-spacing:0px;color:#000000;font-size:14px;font-family:Arial;border-collapse:collapse;">
+        <div style="height:20px;"></div>
+        <tr>
+          <td id="scanSelect"  width="20%">Select</td>
+          <td id="scanSSID" width="50%">Name</td>
+          <td id="scanChannel" width="30%">Rss</td>
+        </tr>
+        /*%*VAR_CONFIG(STA_SCAN,sta_scan);*%*/
+      </table>
+    </form>
+</body>
+</html>

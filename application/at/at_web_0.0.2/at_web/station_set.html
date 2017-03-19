@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+    <script type="text/javascript" src="station_set$.js"></script>
+<style>
+.in_body
+{
+	margin-top:0px;
+	margin-left:0px;
+	margin-right:0px;
+	margin-bottom:0px;
+	background-color:transparent;
+}
+.div_c
+{
+	margin-left:50px;
+	margin-right:50px;
+	margin-top:30px;
+	margin-bottom:20px;
+}
+.fw
+{
+	float:left;
+	width:30%;
+}
+.items
+{
+	color:#000000;
+	float:left;
+	font-size:15px;
+}
+.label
+{
+	float:left;
+	width:50%;
+	color:#000000;
+	margin-bottom:-2px;
+	font-size:15px;
+}
+.label1
+{
+	float:left;
+	margin-left:52px;
+	width:50%;
+	color:#000000;
+	margin-bottom:-2px;
+	font-size:15px;
+}
+.lab_tr
+{
+    margin-left:70px;
+    margin-right:25px;
+    color:#000000;
+    font-size:15px;
+    text-align:right;
+}
+.cl
+{
+	clear:left;
+}
+.line1
+{
+	height:1px;
+	background-color:#000000;
+	width:82%;
+	margin-left:52px;
+	margin-top:5px;
+	margin-bottom:5px;
+	overflow:hidden;
+}
+.btn
+{
+	width:66px;
+	height:27px;
+	border-style:none;
+	border-radius:3px 3px 3px 3px;
+	font-size:14px;
+	font-weight:bold; 
+	background-color:#6699FF;
+	color:#000000;
+	cursor:pointer;
+}
+</style>
+</head>
+<body class="in_body" onload="init_sta_setting();init_dhcp_setting();init_sta_manage_wifi_setting()">
+    <div class="div_c" style="font-family:微软雅黑">
+
+        <div style="height:400px" id="sta_web_id">
+            <form name= "form_sta_setting" method="post" action="config_success.html">
+            <div class="cl"></div>
+            <div style="height:10px;"></div>
+            <div class="label" style="font-weight:bold;font-size:17px">无线终端参数设置</div>
+            <div class="cl"></div>
+            <div style="height:20px;"></div>
+
+            <div class="label1">网络名称（SSID）</div>
+            <div class="fw"><input name="sta_ssid" type="text" style="width:166px;font-size:14px" /></div>
+            <div style="margin-top:20px;color:#3673b3;width:100%;text-align:right">
+                <input type="button" class="btn" value="搜索" onclick="scan()"/>
+            </div>
+            <div class="cl"></div>
+            <div class="line1"></div>
+          
+            <div class="label1">加密方式</div>
+            <div class="fw">
+                <select style="width:160px;height:20px" name="sta_sec" onchange="auth_change()" style="width:130px;">
+                    <option value="disable">Disable</option>
+				    <option value="enable">Enable</option>
+				</select>
+			</div>
+            <div class="cl"></div>
+            <div class="line1"></div>
+
+            <div id="sta_key_id" style="visibility:hidden;display:none">
+				<div class="label1">网络密码</div>
+				<div class="fw">
+				<input name="sta_key" type="text" class="text" id="key_text1"/>
+				</div>
+                <div class="cl"></div>
+			    <div class="line1"></div>
+			</div>
+          
+        
+            <div style="margin-top:20px;color:#000000;width:100%;text-align:right">
+                <input onclick="sta_form_apply()" type="button" class="btn" value="保存"/>
+            </div>
+            </form>
+
+            <form name= "form_dhcp_setting" method="post" action="config_success.html">
+                <div class="cl"></div>
+                <div style="height:10px;"></div>
+                <div class="label" style="font-weight:bold;font-size:17px">STA的IP设置</div>
+                <div class="cl"></div>
+                <div style="height:20px;"></div>
+
+                <div class="label1">自动获得IP地址</div>
+                <div class="fw">
+			        <select style="width:160px;height:20px" name="sta_dhcp" id="sta_dhcp_id" style="width:100px;" onchange="dhcp_change()">
+			        <option value="dhcp_client">DHCP自动</option>
+			        <option value="dhcp_disable">DHCP手动</option>
+			        </select>
+			    </div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">IP地址</div>
+                <div class="fw"><input name="sta_ip" id="sta_ip_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">子网掩码</div>
+                <div class="fw"><input name="sta_netmask" id="sta_netmask_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">网关地址</div>
+                <div class="fw"><input name="sta_gateway" id="sta_gateway_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div style="margin-top:20px;color:#3673b3;width:100%;text-align:right">
+                    <input onclick="dhcp_form_apply()" type="button" class="btn" value="保存"/>
+                </div>
+            </form>
+
+            <form name= "form_manage_wifi_setting" method="post" action="config_success.html">
+                <div class="cl"></div>
+                <div style="height:10px;"></div>
+                <div class="label" style="font-weight:bold;font-size:17px">管理已知WiFi</div>
+                <div class="cl"></div>
+                <div style="height:20px;"></div>
+
+                <div class="label1">网络1名称</div>
+                <div class="fw"><input name="sta_ssid1" id="sta_ssid1_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="label1">网络1密码</div>
+                <div class="fw"><input name="sta_key1" id="sta_key1_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">网络2名称</div>
+                <div class="fw"><input name="sta_ssid2" id="sta_ssid2_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="label1">网络2密码</div>
+                <div class="fw"><input name="sta_key2" id="sta_key2_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">网络3名称</div>
+                <div class="fw"><input name="sta_ssid3" id="sta_ssid3_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="label1">网络3密码</div>
+                <div class="fw"><input name="sta_key3" id="sta_key3_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">网络4名称</div>
+                <div class="fw"><input name="sta_ssid4" id="sta_ssid4_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="label1">网络4密码</div>
+                <div class="fw"><input name="sta_key4" id="sta_key4_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div class="label1">网络5名称</div>
+                <div class="fw"><input name="sta_ssid5" id="sta_ssid5_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="label1">网络5密码</div>
+                <div class="fw"><input name="sta_key5" id="sta_key5_id" type="text" style="width:162px"/></div>
+                <div class="cl"></div>
+                <div class="line1"></div>
+
+                <div style="margin-top:20px;color:#3673b3;width:100%;text-align:right">
+                    <input onclick="sta_manage_wifi_apply()" type="button" class="btn" value="保存"/>
+                </div>
+            </form>
+
+        </div>
+
+        <div style="height:500px;display:none" id="scan_web_id">
+            <font class="items">请选择您当前使用的无线网络</font>
+            <div style="height:15px;"></div>
+            <div style="height:300px">
+                <iframe frameborder="0" style="border-style:none;width:100%;height:250px; border-spacing:0px;background-color:#FFFFFF" id="sta_scan_iframe"></iframe>
+            </div>
+            <div style="height:10px;"></div>
+            <div class="lab_tr">
+                <input type="button" class="btn" value="确定" onclick="hide('scan_web_id');show('sta_web_id');to_surver(gg_ssid);"/>
+                <input onclick="scan()" type="button" class="btn" value="刷新" id="refresh"/>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+                                                      

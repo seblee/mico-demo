@@ -32,6 +32,7 @@ uint32_t HKPairInfoCount(void)
     if(pairList->pairInfo[i].controllerName[0] != 0x0)
       count++;
   }
+  printf("Current paired %d\r\n", count);
   return count;
 }
 

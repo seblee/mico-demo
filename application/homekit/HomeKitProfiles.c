@@ -19,13 +19,14 @@
 #include "mico_app_define.h"
 #include "common.h"
 
-struct  _hapCharacteristic_t acc_info_characteristics[5] =
+struct  _hapCharacteristic_t acc_info_characteristics[] =
 {
   [0] = {
     .type = "23",
     .valueType = ValueType_string,
     .secureRead = true,
     .hasEvents = false,
+    .format = "string"
   },
   [1] = { //public.hap.characteristic.manufacturer
     .type = "20",
@@ -34,6 +35,7 @@ struct  _hapCharacteristic_t acc_info_characteristics[5] =
     .value.stringValue = MANUFACTURER,
     .secureRead = true,
     .hasEvents = false,
+    .format = "string"
   },
   [2] = { //public.hap.characteristic.serial-number
     .type = "30",
@@ -42,6 +44,7 @@ struct  _hapCharacteristic_t acc_info_characteristics[5] =
     .value.stringValue = SERIAL_NUMBER,
     .secureRead = true,
     .hasEvents = false,
+    .format = "string"
   },  
   [3] = { //public.hap.characteristic.model
     .type = "21",
@@ -50,18 +53,29 @@ struct  _hapCharacteristic_t acc_info_characteristics[5] =
     .value.stringValue = MODEL,
     .secureRead = true,
     .hasEvents = false,
+    .format = "string"
   },
-  [4] = { //public.hap.characteristic.identify
+  [4] = { //public.hap.characteristic.firmware.revision
+    .type = "52",
+    .valueType = ValueType_string,
+    .hasStaticValue = true,
+    .value.stringValue = FIRMWARE_REVISION,
+    .secureRead = true,
+    .hasEvents = false,
+    .format = "string"
+  },
+  [5] = { //public.hap.characteristic.identify
     .type = "14",
     .valueType = ValueType_null,
     .hasStaticValue = true,
     .secureRead = false,
     .secureWrite = true,
     .hasEvents = false,
+    .format = "bool"
   }
 };
 
-struct  _hapCharacteristic_t lightbulb_characteristics[5] =
+struct  _hapCharacteristic_t lightbulb_characteristics[] =
 {
   [0] = { //public.hap.characteristic.on
     .type = "25",
@@ -69,6 +83,7 @@ struct  _hapCharacteristic_t lightbulb_characteristics[5] =
     .secureRead = true,
     .secureWrite = true,
     .hasEvents = true,
+    .format = "bool"
   },
   [1] = { //public.hap.characteristic.brightness
     .type = "8",
@@ -76,6 +91,7 @@ struct  _hapCharacteristic_t lightbulb_characteristics[5] =
     .secureRead = true,
     .secureWrite = true,
     .hasEvents = true,
+    .format = "int"
     // .hasMinimumValue = true,
     // .minimumValue = 0,
     // .hasMaximumValue = true,
@@ -90,6 +106,7 @@ struct  _hapCharacteristic_t lightbulb_characteristics[5] =
     .secureRead = true,
     .secureWrite = true,
     .hasEvents = true,
+    .format = "float"
     // .hasMinimumValue = true,
     // .minimumValue.floatValue = 0,
     // .hasMaximumValue = true,
@@ -104,6 +121,7 @@ struct  _hapCharacteristic_t lightbulb_characteristics[5] =
     .secureRead = true,
     .secureWrite = true,
     .hasEvents = true,
+    .format = "float"
     // .hasMinimumValue = true,
     // .minimumValue.floatValue = 0,
     // .hasMaximumValue = true,
@@ -120,10 +138,11 @@ struct  _hapCharacteristic_t lightbulb_characteristics[5] =
     .secureRead = true,
     .secureWrite = false,
     .hasEvents = false,
+    .format = "string",
   }
 };
 
-struct  _hapCharacteristic_t fan_characteristics[2] =
+struct  _hapCharacteristic_t fan_characteristics[] =
 {
   [0] = { //public.hap.characteristic.on
     .type = "25",
@@ -131,19 +150,11 @@ struct  _hapCharacteristic_t fan_characteristics[2] =
     .secureRead = true,
     .secureWrite = true,
     .hasEvents = true,
+    .format = "bool",
   },
-  [1] = { //public.hap.characteristic.name
-    .type = "23",
-    .valueType = ValueType_string,
-    .hasStaticValue = true,
-    .value.stringValue = "DC motor",
-    .secureRead = true,
-    .secureWrite = false,
-    .hasEvents = false,
-  }
 };
 
-struct  _hapCharacteristic_t temp_characteristics[2] =
+struct  _hapCharacteristic_t temp_characteristics[] =
 {
   [0] = { //public.hap.characteristic.temperature.current
     .type = "11",
@@ -158,19 +169,12 @@ struct  _hapCharacteristic_t temp_characteristics[2] =
     // .hasMinimumStep = true,
     // .minimumStep.floatValue = 0.1,
     // .unit = "celsius",
+    .format = "float",
   },
-  [1] = { //public.hap.characteristic.name
-    .type = "23",
-    .valueType = ValueType_string,
-    .hasStaticValue = true,
-    .value.stringValue = "temperature",
-    .secureRead = true,
-    .secureWrite = false,
-    .hasEvents = false,
-  }
+
 };
 
-struct  _hapCharacteristic_t humidity_characteristics[2] =
+struct  _hapCharacteristic_t humidity_characteristics[] =
 {
   [0] = { //public.hap.characteristic.relative-humidity.current
     .type = "10",
@@ -178,6 +182,7 @@ struct  _hapCharacteristic_t humidity_characteristics[2] =
     .secureRead = true,
     .secureWrite = false,
     .hasEvents = true,
+    .format = "float",
     // .hasMinimumValue = true,
     // .minimumValue.floatValue = 0,
     // .hasMaximumValue = true,
@@ -186,18 +191,9 @@ struct  _hapCharacteristic_t humidity_characteristics[2] =
     // .minimumStep.floatValue = 1,
     // .unit = "percentage",
   },
-  [1] = { //public.hap.characteristic.name
-    .type = "23",
-    .valueType = ValueType_string,
-    .hasStaticValue = true,
-    .value.stringValue = "humidity",
-    .secureRead = true,
-    .secureWrite = false,
-    .hasEvents = false,
-  }
 };
 
-struct  _hapCharacteristic_t occupancy_characteristics[2] =
+struct  _hapCharacteristic_t occupancy_characteristics[] =
 {
   [0] = { //public.hap.characteristic.relative-humidity.current
     .type = "71",
@@ -205,6 +201,7 @@ struct  _hapCharacteristic_t occupancy_characteristics[2] =
     .secureRead = true,
     .secureWrite = false,
     .hasEvents = true,
+    .format = "uint8",
     // .hasMinimumValue = true,
     // .minimumValue.intValue = 0,
     // .hasMaximumValue = true,
@@ -212,47 +209,39 @@ struct  _hapCharacteristic_t occupancy_characteristics[2] =
     // .hasMinimumStep = true,
     // .minimumStep.intValue = 1,
   },
-  [1] = { //public.hap.characteristic.name
-    .type = "23",
-    .valueType = ValueType_string,
-    .hasStaticValue = true,
-    .value.stringValue = "Infra red",
-    .secureRead = true,
-    .secureWrite = false,
-    .hasEvents = false,
-  }
 };
 
 struct _hapService_t micokit_demo_services[] = 
 {
   [0] = { //public.hap.service.accessory-information
-    .type = "3E",
-    .num_of_characteristics = 5,
-    .characteristic = acc_info_characteristics,
-  },
+            .type = "3E",
+            .num_of_characteristics = sizeof(acc_info_characteristics) / sizeof(struct _hapCharacteristic_t),
+            .characteristic = acc_info_characteristics,
+        },
   [1] = { //public.hap.service.lightbulb
           .type = "43",
-          .num_of_characteristics = 5,
+          .num_of_characteristics = sizeof(lightbulb_characteristics) / sizeof(struct _hapCharacteristic_t),
           .characteristic = lightbulb_characteristics,
         },
   [2] = { //public.hap.service.fan
           .type = "40",
-          .num_of_characteristics = 2,
+          .num_of_characteristics = sizeof(fan_characteristics) / sizeof(struct _hapCharacteristic_t),
           .characteristic = fan_characteristics,
         },
+
   [3] = { //public.hap.service.sensor.temperature
           .type = "8A",
-          .num_of_characteristics = 2,
+          .num_of_characteristics = sizeof(temp_characteristics) / sizeof(struct _hapCharacteristic_t),
           .characteristic = temp_characteristics,
         },
   [4] = { //public.hap.service.sensor.humidity
           .type = "82",
-          .num_of_characteristics = 2,
+          .num_of_characteristics = sizeof(humidity_characteristics) / sizeof(struct _hapCharacteristic_t),
           .characteristic = humidity_characteristics,
         },
   [5] = { //public.hap.service.sensor.occupancy
           .type = "86",
-          .num_of_characteristics = 2,
+          .num_of_characteristics = sizeof(occupancy_characteristics) / sizeof(struct _hapCharacteristic_t),
           .characteristic = occupancy_characteristics,
         },
 };

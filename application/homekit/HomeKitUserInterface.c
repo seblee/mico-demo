@@ -159,7 +159,7 @@ HkStatus HKReadCharacteristicValue( int accessoryID, int serviceID, int characte
   }else if(serviceID == 6){
     switch(characteristicID){
       case 1:
-        (*value).intValue = app_context->occupancy.occupancy; 
+        (*value).intValue = app_context->occupancy.occupancy;
         err = app_context->occupancy.occupancy_status;
         break;
     }

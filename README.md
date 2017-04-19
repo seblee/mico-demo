@@ -113,7 +113,16 @@ mico make os.os_thread@MK3165 total download run JTAG=jlink_swd
 ![debug_config](image/debug_project_config.png)
 ![debug_view](image/debug_view.png)
 
+###故障排除
 
+请确认您的mico-cube工作在最新版本，当前最新版本为：1.0.4。请使用以下命令查询：
+```
+ mico --version
+```
+如不是最新版本，可使用以下命令更新：
+```
+ pip install mico-cube --upgrade
+```
 
 mico-demos
 ====
@@ -233,3 +242,13 @@ mico make os.os_thread@MK3165 total download run JTAG=jlink_swd
 ![debug_config](image/debug_project_config.png)
 ![debug_view](image/debug_view.png)
 
+###Troubleshooting
+
+Make sure mico-cube is working correctly and its version is >1.0.4
+```
+ mico --version
+```
+If not, you can update it:
+```
+ pip install mico-cube --upgrade
+```

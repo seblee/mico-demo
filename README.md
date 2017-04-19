@@ -145,7 +145,7 @@ This file includes a series of sample programs for MiCO.
 
 
 ### Preparations:
-1. You should install [mico-cube](https://code.aliyun.com/mico/mico-cube?spm=a2111a.8458726.0.0.j0sX0w)
+1. You should install [mico-cube](https://code.aliyun.com/mico/mico-cube)
 2. Install MiCoder IDE and download address: [MiCoder IDE](http://developer.mico.io/downloads/2);
 3. Prepare a Jlink tool (for ST develpment board，use STlink)，and install its driver；
 4. Connect Jlink to PC, and update its driver following the step 1 in [Jlink driver update](http://developer.mico.io/docs/10)；

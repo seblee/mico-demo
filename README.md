@@ -1,10 +1,10 @@
 mico-demos
 ====
-包含：一系列基于MiCO的示例程序代码。
+包含：一系列基于MiCO的示例程序。
 
 ###目录
 * algorithm：安全和校验算法示例程序，如：MD5，AES,CRC16等。
-* application：应用程序示例程序代码，如：wifi_uart透传程序，苹果homekit等。
+* application：应用程序示例程序，如：wifi_uart透传程序，苹果homekit等。
 * bluetooth：蓝牙功能相关的示例程序，如：蓝牙center，蓝牙sensor和蓝牙设备扫描等。
 * filesystem：文件系统读写功能示例程序。
 * hardware：硬件外设控制实现示例程序。

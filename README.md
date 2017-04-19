@@ -25,7 +25,7 @@ mico-demos
 5. 使用USB线连接PC和MiCOKit，实现一个虚拟串口用于供电和输出调试信息, 驱动下载地址：[VCP driver](http://www.ftdichip.com/Drivers/VCP.htm)；
 
 ###导入工程
-通过系统命令行，从git仓库中导入mico-demos文件夹：
+通过系统命令行，从git仓库中导入mico-demos：
 ```
 mico import mico-demos
 cd mico-demos

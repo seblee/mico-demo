@@ -18,7 +18,7 @@ mico-demos
 
 
 ### 使用前准备
-1. 首先您需要安装 [mico-cube](https://code.aliyun.com/mico/mico-cube?spm=a2111a.8458726.0.0.j0sX0w).
+1. 首先您需要安装 [mico-cube](https://code.aliyun.com/mico/mico-cube).
 2. 安装MiCoder IDE集成开发环境，下载地址：[MiCoder IDE](http://developer.mico.io/downloads/2)；
 3. 准备一个Jlink下载调试工具(针对ST开发板，可使用Stlink)，并在PC上安装Jlink驱动软件；
 4. 连接Jlink工具到PC端，并更新驱动程序，具体方法参考：[MiCO SDK 使用](http://developer.mico.io/docs/10)页面中步骤 1；
@@ -121,7 +121,7 @@ mico make os.os_thread@MK3165 total download run JTAG=jlink_swd
 ```
 如不是最新版本，可使用以下命令更新：
 ```
- pip install mico-cube --upgrade
+ mico upgrade
 ```
 
 mico-demos
@@ -250,5 +250,5 @@ Make sure mico-cube is working correctly and its version is >1.0.4
 ```
 If not, you can update it:
 ```
- pip install mico-cube --upgrade
+ mico upgrade
 ```

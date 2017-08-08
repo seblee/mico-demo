@@ -10,7 +10,6 @@
 NAME := App_WiFi_UART
 
 $(NAME)_SOURCES := MICOAppEntrance.c \
-                   MICOBonjour.c \
                    RemoteTcpClient.c \
                    LocalTcpServer.c \
                    SppProtocol.c \

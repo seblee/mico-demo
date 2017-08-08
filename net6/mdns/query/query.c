@@ -39,7 +39,7 @@ char service_type[]="_smb._tcp.local";
 
 static int _mdns_query_cb(void *data, const struct mdns_service *s, int status)
 {
-    struct in_addr addr;
+    char ip_str_buf[INET6_ADDRSTRLEN];
 
     qurey_printf("\r\n==================Got callback for %s======================\r\n", s->servname);
 
@@ -59,8 +59,10 @@ static int _mdns_query_cb(void *data, const struct mdns_service *s, int status)
                  s->proto == MDNS_PROTO_UDP ? "udp" : "tcp",
                  s->domain, s->port);
 
-    addr.s_addr = s->ipaddr;
-    qurey_printf("at %s\r\n", inet_ntoa(addr));
+    qurey_printf("at %s\r\n", inet_ntop(AF_INET, &s->ipaddr, ip_str_buf, INET6_ADDRSTRLEN));
+#if MICO_CONFIG_IPV6
+    qurey_printf("at %s\r\n", inet_ntop(AF_INET6, s->ip6addr, ip_str_buf, INET6_ADDRSTRLEN));
+#endif
 
     qurey_printf("TXT : %s\r\n", s->keyvals ? s->keyvals : "no key vals");
 

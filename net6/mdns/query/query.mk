@@ -22,9 +22,8 @@
 ############################################################################### 
 
 
-NAME := App_websocket_client
+NAME := App_mdns_query
 
-$(NAME)_SOURCES := websocket.c test-client.c
+$(NAME)_SOURCES := query.c  
 
-$(NAME)_COMPONENTS := protocols/libwebsocket
-
+$(NAME)_COMPONENTS := protocols/mdns

@@ -1,15 +1,14 @@
 /**
  ******************************************************************************
- * @file    app_httpd.h
- * @author  QQ DING
+ * @file    wifi_station.c
+ * @author  William Xu
  * @version V1.0.0
- * @date    1-September-2015
- * @brief   This header contains function prototypes called by httpd protocol
- *          operations
+ * @date    21-May-2015
+ * @brief   Connect to access point using core MiCO wlan APIs
  ******************************************************************************
  *
  *  The MIT License
- *  Copyright (c) 2016 MXCHIP Inc.
+ *  Copyright (c) 2014 MXCHIP Inc.
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,17 +26,37 @@
  *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  *  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
  ******************************************************************************
  */
 
-extern const unsigned char wififail[0xAC9];
+#include "mico.h"
+#include "mdns.h"
 
-extern const unsigned char wifisetting[0xD5E];
+struct mdns_service demo_service;
+char   keyvals[]="txtvers=2/.0/.1.path=/mico_demo";
 
-extern const unsigned char wifisuccess[0x9BC];
+int application_start(void)
+{
+    OSStatus err = kNoErr;
 
-int app_httpd_start( void );
+    /* Initialize system core data */
+    mico_Context_t *context = mico_system_context_init( 0 );
 
-int app_httpd_stop();
+    /* Initialize tcpip, Wi-Fi stacks and system functions */
+    err = mico_system_init( context );
+
+    /* Initialize mdns protocol and add a service*/
+    memset(&demo_service, 0x0, sizeof(demo_service));
+    demo_service.servname = "demo_web",
+    demo_service.servtype = "http",
+    demo_service.domain = ".local",
+    demo_service.port = 80,
+    demo_service.proto = MDNS_PROTO_TCP,
+    mdns_set_txt_rec(&demo_service, keyvals, '.');
+
+    mdns_start(NULL, DEFAULT_NAME);
+    mdns_announce_service(&demo_service, INTERFACE_STA);
+
+    return err;
+}
 

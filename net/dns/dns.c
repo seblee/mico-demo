@@ -41,7 +41,7 @@ static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContex
     switch ( status )
     {
         case NOTIFY_STATION_UP:
-            mico_rtos_set_semaphore( &wait_sem );
+            if ( wait_sem != NULL ) mico_rtos_set_semaphore( &wait_sem );
             break;
         case NOTIFY_STATION_DOWN:
             case NOTIFY_AP_UP:

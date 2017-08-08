@@ -1,26 +1,26 @@
 /**
-  @page "udp_unicast"  demo
+  @page " mDNS"  demo
   
   @verbatim
   ******************** (C) COPYRIGHT 2016 MXCHIP MiCO SDK*******************
-  * @file    udp_unicast/readme.txt 
+  * @file    mdns/readme.txt 
   * @author  MDWG (MiCO Documentation Working Group)
   * @version v2.4.x
   * @date    11-April-2016
-  * @brief   Description of the  "udp_unicast"  demo.
+  * @brief   Description of the  "mdns"  demo.
   ******************************************************************************
 
 
- @par Demo Description 
-  This demo shows:  how to start an UDP unicast sevice, and receive data from designated IP adress and designated port after Easylink configuration.
+  @par Demo Description 
+  This demo shows:  how to make device found by other device by bonjour sevice.
 
 
 @par Directory contents 
-    - Demos/tcpip/udp_unicast/udp_unicast.c   UDP unicast program
-    - Demos/tcpip/udp_unicast/mico_config.h   MiCO function header file
+    - Demos/tcpip/mDNS/mdns.c          mDNS applicaiton program
+    - Demos/tcpip/mDNS/mico_config.h   MiCO function header file
 
 
-@par Hardware and Software environment       
+@par Hardware and Software environment        
     - This demo has been tested on MiCOKit-3165 board.
     - This demo can be easily tailored to any other supported device and development board.
 

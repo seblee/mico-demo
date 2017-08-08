@@ -326,7 +326,7 @@ int application_start( void )
   hsb2rgb_led_open( (hello_sensor_state.led_color_idx * 60)%360 , 100, 5 );
 #endif
 
-#if defined(MICO_CLI_ENABLE)
+#if MICO_CLI_ENABLE
   if ( UART_FOR_APP == CLI_UART )
   {
     hello_sensor_log( "BLE SPP demo disabled by limited UART peripherals" );
@@ -342,7 +342,7 @@ int application_start( void )
   require_noerr_string( err, exit, "ERROR: Unable to start the uart recv thread." );
 #endif
 
-#if defined MICO_CLI_ENABLE
+#if MICO_CLI_ENABLE
   cli_register_commands( hello_sensor_send_message_cmd, 2 );
 #endif
 

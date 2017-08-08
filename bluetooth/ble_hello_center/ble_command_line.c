@@ -47,7 +47,7 @@
 #include "StringUtils.h"
 #include "LinkListUtils.h"
 
-#ifdef MICO_CLI_ENABLE
+#if MICO_CLI_ENABLE
 
 static void socket_list ( CLI_ARGS );
 static void paired_list ( CLI_ARGS );

@@ -149,10 +149,6 @@ int application_start( void )
     err = mico_system_init( mico_context );
     require_noerr( err, exit );
 
-    /* Initialize service discovery */
-    err = MICOStartBonjourService( Station, app_context );
-    require_noerr( err, exit );
-
     /* Protocol initialize */
     sppProtocolInit( app_context );
 

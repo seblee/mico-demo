@@ -22,8 +22,8 @@
 ############################################################################### 
 
 
-NAME := App_mdns
+NAME := App_mdns_responder
 
-$(NAME)_SOURCES := mdns.c
-				      
+$(NAME)_SOURCES := responder.c  
 
+$(NAME)_COMPONENTS := protocols/mdns

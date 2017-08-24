@@ -26,4 +26,9 @@
  * MiCO TCP server used for configuration and ota. */
 #define MICO_CONFIG_SERVER_ENABLE                   1
 
+/************************************************************************
+ * Start standard QC test function other than application  */
+#define MICO_QUALITY_CONTROL_ENABLE                 1
+
+
 #endif

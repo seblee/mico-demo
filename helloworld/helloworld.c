@@ -34,20 +34,18 @@
 
 #define os_helloworld_log(format, ...)  custom_log("helloworld", format, ##__VA_ARGS__)
 
-int application_start( void )
+int main(void)
 {
-  /* Start MiCO system functions according to mico_config.h*/
-  mico_system_init( mico_system_context_init( 0 ) );
-  
-  /* Output on debug serial port */
-  os_helloworld_log( "Hello world!" );
+    /* Output on debug serial port */
+    os_helloworld_log("Hello world!");
 
-  /* Trigger MiCO system led available on most MiCOKit */
-  while(1)
-  {
-      MicoGpioOutputTrigger( MICO_SYS_LED );
-      mico_thread_sleep(1);
-  }
+    cli_init();
+
+    /* Trigger MiCO system led available on most MiCOKit */
+    while ( 1 )
+    {
+        MicoGpioOutputTrigger(MICO_SYS_LED);
+        mico_rtos_delay_milliseconds(1000);
+    }
 }
-
 

@@ -31,7 +31,7 @@
 #ifndef __SPPPROTOCOL_H
 #define __SPPPROTOCOL_H
 
-#include "common.h"
+#include "mico_common.h"
 #include "MICOAppDefine.h"
 
 OSStatus sppProtocolInit(app_context_t * const inContext);

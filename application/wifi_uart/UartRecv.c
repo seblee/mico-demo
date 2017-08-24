@@ -68,13 +68,13 @@ size_t _uart_get_one_packet(uint8_t* inBuf, int inBufLen)
   int datalen;
   
   while(1) {
-    if( MicoUartRecv( UART_FOR_APP, inBuf, inBufLen, UART_RECV_TIMEOUT) == kNoErr){
+    if( MicoUartRecv( MICO_UART_FOR_APP, inBuf, inBufLen, UART_RECV_TIMEOUT) == kNoErr){
       return inBufLen;
     }
    else{
-     datalen = MicoUartGetLengthInBuffer( UART_FOR_APP );
+     datalen = MicoUartGetLengthInBuffer( MICO_UART_FOR_APP );
      if(datalen){
-       MicoUartRecv(UART_FOR_APP, inBuf, datalen, UART_RECV_TIMEOUT);
+       MicoUartRecv(MICO_UART_FOR_APP, inBuf, datalen, UART_RECV_TIMEOUT);
        return datalen;
      }
    }

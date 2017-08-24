@@ -32,7 +32,6 @@
 #include "mico.h"
 #include "SppProtocol.h"
 #include "SocketUtils.h"
-#include "debug.h"
 
 #define MAX_SOCK_MSG_LEN (10*1024)
 int sockmsg_len = 0;
@@ -64,7 +63,7 @@ OSStatus sppWlanCommandProcess(unsigned char *inBuf, int *inBufLen, int inSocket
   (void)inContext;
   OSStatus err = kUnknownErr;
 
-  err = MicoUartSend(UART_FOR_APP, inBuf, *inBufLen);
+  err = MicoUartSend(MICO_UART_FOR_APP, inBuf, *inBufLen);
 
   *inBufLen = 0;
   return err;

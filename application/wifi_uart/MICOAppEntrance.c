@@ -129,7 +129,7 @@ USED void config_server_delegate_recv( const char *key, json_object *value, bool
     }
 }
 
-int application_start( void )
+int main( void )
 {
     app_log_trace();
     OSStatus err = kNoErr;
@@ -164,7 +164,7 @@ int application_start( void )
         uart_config.flags = UART_WAKEUP_DISABLE;
 
     ring_buffer_init( (ring_buffer_t *) &rx_buffer, (uint8_t *) rx_data, UART_BUFFER_LENGTH );
-    MicoUartInitialize( UART_FOR_APP, &uart_config, (ring_buffer_t *) &rx_buffer );
+    MicoUartInitialize( MICO_UART_FOR_APP, &uart_config, (ring_buffer_t *) &rx_buffer );
     err = mico_rtos_create_thread( NULL, MICO_APPLICATION_PRIORITY, "UART Recv", uartRecv_thread,
                                    STACK_SIZE_UART_RECV_THREAD, (mico_thread_arg_t)app_context );
     require_noerr_action( err, exit, app_log("ERROR: Unable to start the uart recv thread.") );
@@ -186,6 +186,5 @@ int application_start( void )
     }
 
 exit:
-    mico_rtos_delete_thread( NULL );
     return err;
 }

@@ -39,8 +39,6 @@ int main(void)
     /* Output on debug serial port */
     os_helloworld_log("Hello world!");
 
-    cli_init();
-
     /* Trigger MiCO system led available on most MiCOKit */
     while ( 1 )
     {

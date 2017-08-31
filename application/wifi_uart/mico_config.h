@@ -30,5 +30,9 @@
  * Start standard QC test function other than application  */
 #define MICO_QUALITY_CONTROL_ENABLE                 1
 
+/************************************************************************
+ * Set local server port to system discovery mdns service  */
+#define MICO_SYSTEM_DISCOVERY_PORT                  8080
+
 
 #endif

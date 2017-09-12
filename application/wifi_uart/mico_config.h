@@ -34,5 +34,6 @@
  * Set local server port to system discovery mdns service  */
 #define MICO_SYSTEM_DISCOVERY_PORT                  8080
 
+//#define MICO_CONFIG_IPV6     1
 
 #endif

@@ -32,8 +32,6 @@
 
 #include "StringUtils.h"
 #include "SppProtocol.h"
-#include "cfunctions.h"
-#include "cppfunctions.h"
 #include "MICOAppDefine.h"
 
 #define app_log(M, ...) custom_log("APP", M, ##__VA_ARGS__)

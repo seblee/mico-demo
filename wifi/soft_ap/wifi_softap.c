@@ -32,37 +32,33 @@
 
 #include "mico.h"
 
-#define wifi_softap_log(M, ...) custom_log("WIFI", M, ##__VA_ARGS__)
+#define app_log(M, ...) MICO_LOG(CONFIG_APP_DEBUG, "APP", M, ##__VA_ARGS__)
 
-static char *ap_ssid = "mxchip_zfw";
-static char *ap_key = "12345678";
+#define SOFTAP_SSID  "mxchip_zfw"
+#define SOFTAP_KEY   "12345678"
 
-int application_start( void )
+int main( void )
 {
-  OSStatus err = kNoErr;
-  network_InitTypeDef_st wNetConfig;
- 
-  err = mico_system_init( mico_system_context_init( 0 ) );
-  require_noerr( err, exit ); 
-  
-  memset(&wNetConfig, 0x0, sizeof(network_InitTypeDef_st));
-  
-  strcpy((char*)wNetConfig.wifi_ssid, ap_ssid);
-  strcpy((char*)wNetConfig.wifi_key, ap_key);
-  
-  wNetConfig.wifi_mode = Soft_AP;
-  wNetConfig.dhcpMode = DHCP_Server;
-  wNetConfig.wifi_retry_interval = 100;
-  strcpy((char*)wNetConfig.local_ip_addr, "192.168.0.1");
-  strcpy((char*)wNetConfig.net_mask, "255.255.255.0");
-  strcpy((char*)wNetConfig.dnsServer_ip_addr, "192.168.0.1");
-  
-  wifi_softap_log("ssid:%s  key:%s", wNetConfig.wifi_ssid, wNetConfig.wifi_key);\
-  micoWlanStart(&wNetConfig);
+    network_InitTypeDef_st wNetConfig;
 
-exit:  
-  mico_rtos_delete_thread(NULL);
-  return err;
+    /* Setup WI-Fi and tcpip stack*/
+    mico_Context_t* context = mico_system_context_init( 0 );
+    mico_system_init( context );
+
+    /* Setup Soft AP*/
+    memset( &wNetConfig, 0x0, sizeof(network_InitTypeDef_st) );
+    strcpy( (char*) wNetConfig.wifi_ssid, SOFTAP_SSID );
+    strcpy( (char*) wNetConfig.wifi_key, SOFTAP_KEY );
+    wNetConfig.wifi_mode = Soft_AP;
+    wNetConfig.dhcpMode = DHCP_Server;
+    strcpy( (char*) wNetConfig.local_ip_addr, "192.168.0.1" );
+    strcpy( (char*) wNetConfig.net_mask, "255.255.255.0" );
+    strcpy( (char*) wNetConfig.dnsServer_ip_addr, "192.168.0.1" );
+
+    app_log("Establish Sodt AP, SSID:%s and KEY:%s", wNetConfig.wifi_ssid, wNetConfig.wifi_key);
+
+    micoWlanStart( &wNetConfig );
+
+    return 0;
 }
-
 

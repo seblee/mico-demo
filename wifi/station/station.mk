@@ -24,7 +24,7 @@
 
 NAME := App_wifi_station
 
-$(NAME)_SOURCES := wifi_station_core_api.c
-#$(NAME)_SOURCES := wifi_station_system_api.c
+#$(NAME)_SOURCES := wifi_station_core_api.c
+$(NAME)_SOURCES := wifi_station_system_api.c
 				      
 

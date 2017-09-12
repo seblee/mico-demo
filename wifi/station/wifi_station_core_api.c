@@ -52,7 +52,7 @@ static void micoNotify_WifiStatusHandler(WiFiEvent event,  void* inContext)
     break;
   }
 }
-int application_start( void )
+int main( void )
 {
   OSStatus err = kNoErr;
   network_InitTypeDef_adv_st  wNetConfigAdv;
@@ -69,9 +69,9 @@ int application_start( void )
   
   /* Initialize wlan parameters */
   memset( &wNetConfigAdv, 0x0, sizeof(wNetConfigAdv) );
-  strcpy((char*)wNetConfigAdv.ap_info.ssid, "Xiaomi.Router");   /* wlan ssid string */
-  strcpy((char*)wNetConfigAdv.key, "stm32f215");                /* wlan key string or hex data in WEP mode */
-  wNetConfigAdv.key_len = strlen("stm32f215");                  /* wlan key length */
+  strcpy((char*)wNetConfigAdv.ap_info.ssid, "mxchip_zfw");   /* wlan ssid string */
+  strcpy((char*)wNetConfigAdv.key, "12345678");                /* wlan key string or hex data in WEP mode */
+  wNetConfigAdv.key_len = strlen("12345678");                  /* wlan key length */
   wNetConfigAdv.ap_info.security = SECURITY_TYPE_AUTO;          /* wlan security mode */
   wNetConfigAdv.ap_info.channel = 0;                            /* Select channel automatically */
   wNetConfigAdv.dhcpMode = DHCP_Client;                         /* Fetch Ip address from DHCP server */
@@ -82,7 +82,6 @@ int application_start( void )
   micoWlanStartAdv(&wNetConfigAdv);
   
 exit:
-  mico_rtos_delete_thread(NULL);
   return err;
 }
 

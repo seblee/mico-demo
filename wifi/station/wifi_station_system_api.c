@@ -31,16 +31,16 @@
 
 #include "mico.h"
 
-int application_start( void )
+int main( void )
 { 
   OSStatus err = kNoErr;
   /* Start MiCO system functions according to mico_config.h, 
      Define macro MICO_WLAN_CONNECTION_ENABLE to enable wlan connection function
      Select wlan configuration mode: MICO_WLAN_CONFIG_MODE
      Define EasyLink settings */
-  err = mico_system_init( mico_system_context_init( 0 ) );
+  mico_Context_t* context = mico_system_context_init( 0 );
+  mico_system_init( context );
   
-  mico_rtos_delete_thread(NULL);
   return err;
 }
 

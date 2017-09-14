@@ -39,8 +39,8 @@ static void micoNotify_ApListCallback(ScanResult *pApList)
   wifi_scan_log("got %d AP", pApList->ApNum);
   for(i=0; i<pApList->ApNum; i++)
   {
-    wifi_scan_log("ap%d: name = %s  | strenth=%d",  
-                  i,pApList->ApList[i].ssid, pApList->ApList[i].ApPower);
+    wifi_scan_log("ap%d: name = %s  | strenth=%ddbm",
+                  i,pApList->ApList[i].ssid, pApList->ApList[i].rssi);
 
   }
 }

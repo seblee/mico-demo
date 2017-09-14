@@ -35,7 +35,7 @@
 #define QUERY_DEBUG MICO_DEBUG_ON
 #define qurey_printf(M, ...) MICO_PRINT(QUERY_DEBUG, M, ##__VA_ARGS__)
 
-char service_type[]="_smb._tcp.local";
+char service_type[]="_airplay._tcp.local";
 
 static int _mdns_query_cb(void *data, const struct mdns_service *s, int status)
 {
@@ -67,7 +67,7 @@ static int _mdns_query_cb(void *data, const struct mdns_service *s, int status)
     return kNoErr;
 }
 
-int application_start(void)
+int main(void)
 {
     OSStatus err = kNoErr;
 
@@ -80,7 +80,6 @@ int application_start(void)
     /* Initialize mdns protocol and start query */
     mdns_start(NULL, DEFAULT_NAME);
     mdns_query_monitor(service_type, _mdns_query_cb, NULL, INTERFACE_STA);
-    //mdns_cli_init();
 
     return err;
 }

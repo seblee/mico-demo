@@ -31,34 +31,30 @@
 
 #include "mico.h"
 
-#define wifi_scan_log(M, ...) custom_log("WIFI", M, ##__VA_ARGS__)
+#define app_log(M, ...) MICO_LOG(CONFIG_APP_DEBUG, "APP", M, ##__VA_ARGS__)
 
-static void micoNotify_ApListCallback(ScanResult *pApList)
+static void micoNotify_ApListCallback( ScanResult *pApList )
 {
-  int i=0;
-  wifi_scan_log("got %d AP", pApList->ApNum);
-  for(i=0; i<pApList->ApNum; i++)
-  {
-    wifi_scan_log("ap%d: name = %s  | strenth=%d",  
-                  i,pApList->ApList[i].ssid, pApList->ApList[i].ApPower);
+    int i = 0;
+    app_log("got %d AP", pApList->ApNum);
+    for ( i = 0; i < pApList->ApNum; i++ )
+        {
+        app_log("ap%d: name = %s  | rssi=%d", i,pApList->ApList[i].ssid, pApList->ApList[i].rssi);
 
-  }
+    }
 }
 
-int application_start( void )
+int main( void )
 {
-  /* Start MiCO system functions according to mico_config.h*/
-  mico_system_init( mico_system_context_init( 0 ) );
-  
-  /* Register user function when wlan scan is completed */
-  mico_system_notify_register( mico_notify_WIFI_SCAN_COMPLETED, (void *)micoNotify_ApListCallback, NULL );
-  
-  wifi_scan_log("start scan mode, please wait...");
-  micoWlanStartScan( );
-  
-  mico_rtos_delete_thread( NULL );
-  return kNoErr;
+    /* Start MiCO system functions according to mico_config.h*/
+    mico_system_init( mico_system_context_init( 0 ) );
+
+    /* Register user function when wlan scan is completed */
+    mico_system_notify_register( mico_notify_WIFI_SCAN_COMPLETED, (void *) micoNotify_ApListCallback, NULL );
+
+    app_log("start scan mode, please wait...");
+    micoWlanStartScan();
+
+    return kNoErr;
 }
-
-
 

@@ -31,16 +31,26 @@
 
 #include "mico.h"
 
+#define wifi_station_log(M, ...) custom_log("WIFI", M, ##__VA_ARGS__)
+
 int application_start( void )
 { 
   OSStatus err = kNoErr;
+  LinkStatusTypeDef link_status;
   /* Start MiCO system functions according to mico_config.h, 
      Define macro MICO_WLAN_CONNECTION_ENABLE to enable wlan connection function
      Select wlan configuration mode: MICO_WLAN_CONFIG_MODE
      Define EasyLink settings */
   err = mico_system_init( mico_system_context_init( 0 ) );
   
-  mico_rtos_delete_thread(NULL);
+  while(1) {
+      micoWlanGetLinkStatus(&link_status);
+      if (link_status.is_connected == MICO_TRUE ) {
+          wifi_station_log( "Connected, RSSI = %ddBm", link_status.rssi );
+      }
+      mico_rtos_delay_milliseconds(1000);
+  }
+
   return err;
 }
 

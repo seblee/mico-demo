@@ -82,7 +82,6 @@ int application_start( void )
   micoWlanStartAdv(&wNetConfigAdv);
   
 exit:
-  mico_rtos_delete_thread(NULL);
   return err;
 }
 

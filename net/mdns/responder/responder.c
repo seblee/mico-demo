@@ -35,7 +35,7 @@
 struct mdns_service demo_service;
 char   keyvals[]="txtvers=2/.0/.1.path=/mico_demo";
 
-int application_start(void)
+int main(void)
 {
     OSStatus err = kNoErr;
 

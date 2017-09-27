@@ -17,6 +17,6 @@
 
 /************************************************************************
  * Enable IPv6 in TCPIP stack. */
-#define MICO_CONFIG_IPV6           1
+#define MICO_CONFIG_IPV6           0
 
 #endif

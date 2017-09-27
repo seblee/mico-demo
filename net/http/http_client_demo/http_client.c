@@ -74,7 +74,7 @@ static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContex
     }
 }
 
-int application_start( void )
+int main( void )
 {
     OSStatus err = kNoErr;
 

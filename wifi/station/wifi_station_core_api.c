@@ -67,11 +67,13 @@ int main( void )
   err = mico_system_notify_register( mico_notify_WIFI_CONNECT_FAILED, (void *)micoNotify_ConnectFailedHandler, NULL );
   require_noerr( err, exit );
   
+  cli_init();
+
   /* Initialize wlan parameters */
   memset( &wNetConfigAdv, 0x0, sizeof(wNetConfigAdv) );
-  strcpy((char*)wNetConfigAdv.ap_info.ssid, "mxchip_zfw");   /* wlan ssid string */
-  strcpy((char*)wNetConfigAdv.key, "12345678");                /* wlan key string or hex data in WEP mode */
-  wNetConfigAdv.key_len = strlen("12345678");                  /* wlan key length */
+  strcpy((char*)wNetConfigAdv.ap_info.ssid, "William Xu");   /* wlan ssid string */
+  strcpy((char*)wNetConfigAdv.key, "mx099555");                /* wlan key string or hex data in WEP mode */
+  wNetConfigAdv.key_len = strlen("mx099555");                  /* wlan key length */
   wNetConfigAdv.ap_info.security = SECURITY_TYPE_AUTO;          /* wlan security mode */
   wNetConfigAdv.ap_info.channel = 0;                            /* Select channel automatically */
   wNetConfigAdv.dhcpMode = DHCP_Client;                         /* Fetch Ip address from DHCP server */

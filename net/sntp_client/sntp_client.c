@@ -38,25 +38,22 @@
 #define sntp_demo_log(M, ...) custom_log("SNTP DEMO", M, ##__VA_ARGS__)
 
 /**/
-static void read_utc_time_from_rtc( struct tm *utc_time )
+static struct tm* read_utc_time_from_rtc( void )
 {
-    mico_rtc_time_t time;
+    time_t t;
+    struct tm *utc_time;
 
     /*Read current time from RTC.*/
-    if ( MicoRtcGetTime( &time ) == kNoErr )
+    if ( mico_rtc_get_time( &t ) == kNoErr )
     {
-        utc_time->tm_sec = time.sec;
-        utc_time->tm_min = time.min;
-        utc_time->tm_hour = time.hr;
-        utc_time->tm_mday = time.date;
-        utc_time->tm_wday = time.weekday;
-        utc_time->tm_mon = time.month - 1;
-        utc_time->tm_year = time.year + 100;
-        sntp_demo_log("Current RTC Time: %s",asctime(utc_time));
+        utc_time = localtime(&t);
+
+        return utc_time;
     }
     else
     {
         sntp_demo_log("RTC function unsupported");
+        return NULL;
     }
 }
 
@@ -66,39 +63,29 @@ static void sntp_time_synced( void )
     struct tm *     currentTime;
     iso8601_time_t  iso8601_time;
     mico_utc_time_t utc_time;
-    mico_rtc_time_t rtc_time;
 
     mico_time_get_iso8601_time( &iso8601_time );
     sntp_demo_log("sntp_time_synced: %.26s", (char*)&iso8601_time);
 
     mico_time_get_utc_time( &utc_time );
 
-    currentTime = localtime( (const time_t *)&utc_time );
-    rtc_time.sec = currentTime->tm_sec;
-    rtc_time.min = currentTime->tm_min;
-    rtc_time.hr = currentTime->tm_hour;
+    //currentTime = localtime( (const time_t *)&utc_time );
 
-    rtc_time.date = currentTime->tm_mday;
-    rtc_time.weekday = currentTime->tm_wday;
-    rtc_time.month = currentTime->tm_mon + 1;
-    rtc_time.year = (currentTime->tm_year + 1900) % 100;
-
-    MicoRtcSetTime( &rtc_time );
+    mico_rtc_set_time( utc_time );
 }
 
-int application_start( void )
+int main( void )
 {
     OSStatus           err = kNoErr;
-    struct tm          utc_time;
+    struct tm*         utc_time;
     mico_utc_time_ms_t utc_time_ms;
     iso8601_time_t     iso8601_time;
 
-    /* Read UTC time from RTC hardware */
-    read_utc_time_from_rtc( &utc_time );
-
-    /* Set UTC time to MiCO system */
-    utc_time_ms = (uint64_t) mktime( &utc_time ) * (uint64_t) 1000;
+    /* Read UTC time from RTC hardware, and update UTC time to MiCO system */
+    utc_time = read_utc_time_from_rtc( );
+    utc_time_ms = (uint64_t) mktime( utc_time ) * (uint64_t) 1000;
     mico_time_set_utc_time_ms( &utc_time_ms );
+    sntp_demo_log("Current RTC Time: %s",asctime( utc_time ) );
 
     /* Start MiCO system functions according to mico_config.h*/
     err = mico_system_init( mico_system_context_init( 0 ) );
@@ -115,8 +102,7 @@ int application_start( void )
         mico_rtos_delay_milliseconds( 10 * 1000 );
     }
 
-    exit:
-    mico_rtos_delete_thread( NULL );
+exit:
     return 0;
 }
 

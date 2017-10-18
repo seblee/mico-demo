@@ -33,11 +33,12 @@
 #include "SocketUtils.h"
 #include "StringUtils.h"
 
-int test_ws_client(char*str, int port);
-
 #define ws_log(M, ...) custom_log("WS", M, ##__VA_ARGS__)
-static mico_semaphore_t wait_sem = NULL;
 
+#define REMOTE_URL "ws://10.0.1.61:8080/examples/websocket/chat"
+
+int test_ws_client(char *url);
+static mico_semaphore_t wait_sem = NULL;
 
 static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContext )
 {
@@ -54,7 +55,7 @@ static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContex
     }
 }
 
-int application_start( void )
+int main( void )
 {
     OSStatus err = kNoErr;
 
@@ -74,11 +75,10 @@ int application_start( void )
     ws_log( "wifi connected successful" );
 
 	//ssl_set_loggingcb(ssl_log);
-	//lws_set_log_level(0xFFF,NULL);
-    test_ws_client("192.168.31.163", 10000);
+//	lws_set_log_level(0xF,NULL);
+    test_ws_client(REMOTE_URL);
 
-    exit:
-    mico_rtos_delete_thread( NULL );
+exit:
     return err;
 }
 

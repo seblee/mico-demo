@@ -28,39 +28,23 @@
 
 #include "libwebsockets.h"
 
-static int deny_deflate, longlived, mirror_lifetime, test_post;
-static struct lws *wsi_dumb, *wsi_mirror;
-static struct lws *wsi_multi[3];
+#define LWS_DEMO_DEBUG MICO_DEBUG_ON
+#define lws_demo_log(M, ...) MICO_LOG(LWS_DEMO_DEBUG, "CHAT", M, ##__VA_ARGS__)
+
+static int deny_deflate, test_post;
+static struct lws *wsi_demo;
 static volatile int force_exit;
-static unsigned int opts, rl_multi[3];
-static int flag_no_mirror_traffic;
-#if defined(LWS_USE_POLARSSL)
-#else
-#if defined(LWS_USE_MBEDTLS)
-#else
-#if defined(LWS_OPENSSL_SUPPORT) && defined(LWS_HAVE_SSL_CTX_set1_param)
-char crl_path[1024] = "";
-#endif
-#endif
-#endif
+static unsigned int opts;
 
 /*
  * This demo shows how to connect multiple websockets simultaneously to a
  * websocket server (there is no restriction on their having to be the same
  * server just it simplifies the demo).
- *
- *  dumb-increment-protocol:  we connect to the server and print the number
- *				we are given
- *
- *  lws-mirror-protocol: draws random circles, which are mirrored on to every
- *				client (see them being drawn in every browser
- *				session also using the test server)
  */
 
 enum demo_protocols {
 
-	PROTOCOL_DUMB_INCREMENT,
-	PROTOCOL_LWS_MIRROR,
+	PROTOCOL_DEMO,
 
 	/* always last */
 	DEMO_PROTOCOL_COUNT
@@ -75,59 +59,42 @@ enum demo_protocols {
  */
 
 static int
-callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
+callback_demo(struct lws *wsi, enum lws_callback_reasons reason,
 			void *user, void *in, size_t len)
 {
 	const char *which = "http";
-	char which_wsi[10], buf[50 + LWS_PRE];
+	char buf[50 + LWS_PRE];
 	int n;
-	static int filte=0;
 
 	switch (reason) {
 
 	case LWS_CALLBACK_CLIENT_ESTABLISHED:
-		lwsl_info("dumb: LWS_CALLBACK_CLIENT_ESTABLISHED\n");
+		lws_demo_log("demo: LWS_CALLBACK_CLIENT_ESTABLISHED");
 		break;
 
 	case LWS_CALLBACK_CLOSED:
-		lwsl_notice("dumb: LWS_CALLBACK_CLOSED\n");
-		wsi_dumb = NULL;
+		lws_demo_log("demo: LWS_CALLBACK_CLOSED");
+		wsi_demo = NULL;
 		break;
 
 	case LWS_CALLBACK_CLIENT_RECEIVE:
 		((char *)in)[len] = '\0';
-		filte++;
-		if (filte == 100) {
-			lwsl_notice("rx %d '%s'\n", (int)len, (char *)in);
-			filte = 0;
-		}
+		lws_demo_log("rx %d '%s'", (int)len, (char *)in);
 		break;
 
 	/* because we are protocols[0] ... */
 
 	case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
-		if (wsi == wsi_dumb) {
-			which = "dumb";
-			wsi_dumb = NULL;
+		if (wsi == wsi_demo) {
+			which = "wsi_demo";
+			wsi_demo = NULL;
 		}
-		if (wsi == wsi_mirror) {
-			which = "mirror";
-			wsi_mirror = NULL;
-		}
-
-		for (n = 0; n < ARRAY_SIZE(wsi_multi); n++)
-			if (wsi == wsi_multi[n]) {
-				sprintf(which_wsi, "multi %d", n);
-				which = which_wsi;
-				wsi_multi[n] = NULL;
-			}
-
-		lwsl_err("CLIENT_CONNECTION_ERROR: %s: %s\n", which, in);
+		lws_demo_log("CLIENT_CONNECTION_ERROR: %s: %s", which, (char *)in);
 		break;
 
 	case LWS_CALLBACK_CLIENT_CONFIRM_EXTENSION_SUPPORTED:
 		if ((strcmp(in, "deflate-stream") == 0) && deny_deflate) {
-			lwsl_notice("denied deflate-stream extension\n");
+			lws_demo_log("denied deflate-stream extension");
 			return 1;
 		}
 		if ((strcmp(in, "x-webkit-deflate-frame") == 0))
@@ -137,7 +104,7 @@ callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_ESTABLISHED_CLIENT_HTTP:
-		lwsl_notice("lws_http_client_http_response %d\n",
+		lws_demo_log("lws_http_client_http_response %d",
 				lws_http_client_http_response(wsi));
 		break;
 
@@ -147,7 +114,7 @@ callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 			char *px = buffer + LWS_PRE;
 			int lenx = sizeof(buffer) - LWS_PRE;
 
-			lwsl_notice("LWS_CALLBACK_RECEIVE_CLIENT_HTTP\n");
+			lws_demo_log("LWS_CALLBACK_RECEIVE_CLIENT_HTTP");
 
 			/*
 			 * Often you need to flow control this by something
@@ -164,7 +131,11 @@ callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_CLIENT_WRITEABLE:
-		lwsl_info("Client wsi %p writable\n", wsi);
+	    lws_demo_log("Client wsi %p writable", wsi);
+	    sprintf((char *)&buf[LWS_PRE],"hello");
+        n = lws_write(wsi, (unsigned char *)&buf[LWS_PRE], strlen(&buf[LWS_PRE]), opts | LWS_WRITE_TEXT);
+        if (n < 0)
+            return -1;
 		break;
 
 	case LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER:
@@ -199,140 +170,23 @@ callback_dumb_increment(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_COMPLETED_CLIENT_HTTP:
-		wsi_dumb = NULL;
+	    wsi_demo = NULL;
 		force_exit = 1;
 		break;
 
-#if defined(LWS_USE_POLARSSL)
-#else
-#if defined(LWS_USE_MBEDTLS)
-#else
-#if defined(LWS_OPENSSL_SUPPORT) && defined(LWS_HAVE_SSL_CTX_set1_param)
-	case LWS_CALLBACK_OPENSSL_LOAD_EXTRA_CLIENT_VERIFY_CERTS:
-		if (crl_path[0]) {
-			/* Enable CRL checking of the server certificate */
-			X509_VERIFY_PARAM *param = X509_VERIFY_PARAM_new();
-			X509_VERIFY_PARAM_set_flags(param, X509_V_FLAG_CRL_CHECK);
-			SSL_CTX_set1_param((SSL_CTX*)user, param);
-			X509_STORE *store = SSL_CTX_get_cert_store((SSL_CTX*)user);
-			X509_LOOKUP *lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-			int n = X509_load_cert_crl_file(lookup, crl_path, X509_FILETYPE_PEM);
-			X509_VERIFY_PARAM_free(param);
-			if (n != 1) {
-				char errbuf[256];
-				n = ERR_get_error();
-				lwsl_err("LWS_CALLBACK_OPENSSL_LOAD_EXTRA_CLIENT_VERIFY_CERTS: SSL error: %s (%d)\n", ERR_error_string(n, errbuf), n);
-				return 1;
-			}
-		}
-		break;
-#endif
-#endif
-#endif
-
 	default:
 		break;
 	}
 
 	return 0;
 }
-
-
-/* lws-mirror_protocol */
-
-
-static int
-callback_lws_mirror(struct lws *wsi, enum lws_callback_reasons reason,
-		    void *user, void *in, size_t len)
-{
-	unsigned char buf[LWS_PRE + 4096];
-	unsigned int rands[4];
-	int l = 0;
-	int n;
-
-	switch (reason) {
-	case LWS_CALLBACK_CLIENT_ESTABLISHED:
-
-		lwsl_notice("mirror: LWS_CALLBACK_CLIENT_ESTABLISHED\n");
-
-		lws_get_random(lws_get_context(wsi), rands, sizeof(rands[0]));
-		mirror_lifetime = 16384 + (rands[0] & 65535);
-		/* useful to test single connection stability */
-		if (longlived)
-			mirror_lifetime += 500000;
-
-		lwsl_info("opened mirror connection with "
-			  "%d lifetime\n", mirror_lifetime);
-
-		/*
-		 * mirror_lifetime is decremented each send, when it reaches
-		 * zero the connection is closed in the send callback.
-		 * When the close callback comes, wsi_mirror is set to NULL
-		 * so a new connection will be opened
-		 *
-		 * start the ball rolling,
-		 * LWS_CALLBACK_CLIENT_WRITEABLE will come next service
-		 */
-		if (!flag_no_mirror_traffic)
-			lws_callback_on_writable(wsi);
-		break;
-
-	case LWS_CALLBACK_CLOSED:
-		lwsl_notice("mirror: LWS_CALLBACK_CLOSED mirror_lifetime=%d\n", mirror_lifetime);
-		wsi_mirror = NULL;
-		break;
-
-	case LWS_CALLBACK_CLIENT_WRITEABLE:
-		if (flag_no_mirror_traffic)
-			return 0;
-		for (n = 0; n < 1; n++) {
-			lws_get_random(lws_get_context(wsi), rands, sizeof(rands));
-			l += sprintf((char *)&buf[LWS_PRE + l],
-					"c #%06X %u %u %u;",
-					rands[0] & 0xffffff,	/* colour */
-					rands[1] & 511,		/* x */
-					rands[2] & 255,		/* y */
-					(rands[3] & 31) + 1);	/* radius */
-		}
-
-		n = lws_write(wsi, &buf[LWS_PRE], l,
-			      opts | LWS_WRITE_TEXT);
-		if (n < 0)
-			return -1;
-		if (n < l) {
-			lwsl_err("Partial write LWS_CALLBACK_CLIENT_WRITEABLE\n");
-			return -1;
-		}
-
-		mirror_lifetime--;
-		if (!mirror_lifetime) {
-			lwsl_info("closing mirror session\n");
-			return -1;
-		}
-		/* get notified as soon as we can write again */
-		lws_callback_on_writable(wsi);
-		break;
-
-	default:
-		break;
-	}
-
-	return 0;
-}
-
 
 /* list of supported protocols and callbacks */
 
 static struct lws_protocols protocols[] = {
 	{
-		"dumb-increment-protocol,fake-nonexistant-protocol",
-		callback_dumb_increment,
-		0,
-		20,
-	},
-	{
-		"fake-nonexistant-protocol,lws-mirror-protocol",
-		callback_lws_mirror,
+		"",
+		callback_demo,
 		0,
 		128,
 	},
@@ -375,294 +229,25 @@ static int ratelimit_connects(unsigned int *last, unsigned int secs)
 	return 1;
 }
 
-#if 0
-int main(int argc, char **argv)
+int test_ws_client(char *url)
 {
-	int n = 0, m, ret = 0, port = 7681, use_ssl = 0, ietf_version = -1;
-	unsigned int rl_dumb = 0, rl_mirror = 0, do_ws = 1, pp_secs = 0, do_multi = 0;
+	int ret = 0, use_ssl = 0, ietf_version = -1;
+	unsigned int rl_dumb = 0, do_ws = 1, pp_secs = 0;
 	struct lws_context_creation_info info;
 	struct lws_client_connect_info i;
 	struct lws_context *context;
 	const char *prot, *p;
 	char path[300];
-	char cert_path[1024] = "";
-	char key_path[1024] = "";
-	char ca_path[1024] = "";
-
-	memset(&info, 0, sizeof info);
-
-	lwsl_notice("libwebsockets test client - license LGPL2.1+SLE\n");
-	lwsl_notice("(C) Copyright 2010-2016 Andy Green <andy@warmcat.com>\n");
-
-	if (argc < 2)
-		goto usage;
-
-	while (n >= 0) {
-		n = getopt_long(argc, argv, "Snuv:hsp:d:lC:K:A:P:mo", options, NULL);
-		if (n < 0)
-			continue;
-		switch (n) {
-		case 'd':
-			lws_set_log_level(atoi(optarg), NULL);
-			break;
-		case 's': /* lax SSL, allow selfsigned, skip checking hostname */
-			use_ssl = LCCSCF_USE_SSL |
-				  LCCSCF_ALLOW_SELFSIGNED |
-				  LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
-			break;
-		case 'S': /* Strict SSL, no selfsigned, check server hostname */
-			use_ssl = LCCSCF_USE_SSL;
-			break;
-		case 'p':
-			port = atoi(optarg);
-			break;
-		case 'P':
-			pp_secs = atoi(optarg);
-			lwsl_notice("Setting pingpong interval to %d\n", pp_secs);
-			break;
-		case 'l':
-			longlived = 1;
-			break;
-		case 'v':
-			ietf_version = atoi(optarg);
-			break;
-		case 'u':
-			deny_deflate = 1;
-			break;
-		case 'm':
-			do_multi = 1;
-			break;
-		case 'o':
-			test_post = 1;
-			break;
-		case 'n':
-			flag_no_mirror_traffic = 1;
-			lwsl_notice("Disabled sending mirror data (for pingpong testing)\n");
-			break;
-		case 'C':
-			strncpy(cert_path, optarg, sizeof(cert_path) - 1);
-			cert_path[sizeof(cert_path) - 1] = '\0';
-			break;
-		case 'K':
-			strncpy(key_path, optarg, sizeof(key_path) - 1);
-			key_path[sizeof(key_path) - 1] = '\0';
-			break;
-		case 'A':
-			strncpy(ca_path, optarg, sizeof(ca_path) - 1);
-			ca_path[sizeof(ca_path) - 1] = '\0';
-			break;
-#if defined(LWS_USE_POLARSSL)
-#else
-#if defined(LWS_USE_MBEDTLS)
-#else
-#if defined(LWS_OPENSSL_SUPPORT) && defined(LWS_HAVE_SSL_CTX_set1_param)
-		case 'R':
-			strncpy(crl_path, optarg, sizeof(crl_path) - 1);
-			crl_path[sizeof(crl_path) - 1] = '\0';
-			break;
-#endif
-#endif
-#endif
-		case 'h':
-			goto usage;
-		}
-	}
-
-	if (optind >= argc)
-		goto usage;
-
-	signal(SIGINT, sighandler);
-
-	memset(&i, 0, sizeof(i));
-
-	i.port = port;
-	if (lws_parse_uri(argv[optind], &prot, &i.address, &i.port, &p))
-		goto usage;
-
-	/* add back the leading / on path */
-	path[0] = '/';
-	strncpy(path + 1, p, sizeof(path) - 2);
-	path[sizeof(path) - 1] = '\0';
-	i.path = path;
-
-	if (!strcmp(prot, "http") || !strcmp(prot, "ws"))
-		use_ssl = 0;
-	if (!strcmp(prot, "https") || !strcmp(prot, "wss"))
-		if (!use_ssl)
-			use_ssl = LCCSCF_USE_SSL;
-
-	/*
-	 * create the websockets context.  This tracks open connections and
-	 * knows how to route any traffic and which protocol version to use,
-	 * and if each connection is client or server side.
-	 *
-	 * For this client-only demo, we tell it to not listen on any port.
-	 */
-
-	info.port = CONTEXT_PORT_NO_LISTEN;
-	info.protocols = protocols;
-	info.gid = -1;
-	info.uid = -1;
-	info.ws_ping_pong_interval = pp_secs;
-
-	if (use_ssl) {
-		info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
-
-		/*
-		 * If the server wants us to present a valid SSL client certificate
-		 * then we can set it up here.
-		 */
-
-		if (cert_path[0])
-			info.ssl_cert_filepath = cert_path;
-		if (key_path[0])
-			info.ssl_private_key_filepath = key_path;
-
-		/*
-		 * A CA cert and CRL can be used to validate the cert send by the server
-		 */
-		if (ca_path[0])
-			info.ssl_ca_filepath = ca_path;
-#if defined(LWS_USE_POLARSSL)
-#else
-#if defined(LWS_USE_MBEDTLS)
-#else
-#if defined(LWS_OPENSSL_SUPPORT) && defined(LWS_HAVE_SSL_CTX_set1_param)
-		else if (crl_path[0])
-			lwsl_notice("WARNING, providing a CRL requires a CA cert!\n");
-#endif
-#endif
-#endif
-	}
-
-	if (use_ssl & LCCSCF_USE_SSL)
-		lwsl_notice(" Using SSL\n");
-	else
-		lwsl_notice(" SSL disabled\n");
-	if (use_ssl & LCCSCF_ALLOW_SELFSIGNED)
-		lwsl_notice(" Selfsigned certs allowed\n");
-	else
-		lwsl_notice(" Cert must validate correctly (use -s to allow selfsigned)\n");
-	if (use_ssl & LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK)
-		lwsl_notice(" Skipping peer cert hostname check\n");
-	else
-		lwsl_notice(" Requiring peer cert hostname matches\n");
-
-	context = lws_create_context(&info);
-	if (context == NULL) {
-		fprintf(stderr, "Creating libwebsocket context failed\n");
-		return 1;
-	}
-
-	i.context = context;
-	i.ssl_connection = use_ssl;
-	i.host = i.address;
-	i.origin = i.address;
-	i.ietf_version_or_minus_one = ietf_version;
-	i.client_exts = exts;
-
-	if (!strcmp(prot, "http") || !strcmp(prot, "https")) {
-		lwsl_notice("using %s mode (non-ws)\n", prot);
-		if (test_post) {
-			i.method = "POST";
-			lwsl_notice("POST mode\n");
-		}
-		else
-			i.method = "GET";
-		do_ws = 0;
-	} else
-		lwsl_notice("using %s mode (ws)\n", prot);
-
-	/*
-	 * sit there servicing the websocket context to handle incoming
-	 * packets, and drawing random circles on the mirror protocol websocket
-	 *
-	 * nothing happens until the client websocket connection is
-	 * asynchronously established... calling lws_client_connect() only
-	 * instantiates the connection logically, lws_service() progresses it
-	 * asynchronously.
-	 */
-
-	m = 0;
-	while (!force_exit) {
-
-		if (do_multi) {
-			for (n = 0; n < ARRAY_SIZE(wsi_multi); n++) {
-				if (!wsi_multi[n] && ratelimit_connects(&rl_multi[n], 2u)) {
-					lwsl_notice("dumb %d: connecting\n", n);
-					i.protocol = protocols[PROTOCOL_DUMB_INCREMENT].name;
-					i.pwsi = &wsi_multi[n];
-					lws_client_connect_via_info(&i);
-				}
-			}
-		} else {
-
-			if (do_ws) {
-				if (!wsi_dumb && ratelimit_connects(&rl_dumb, 2u)) {
-					lwsl_notice("dumb: connecting\n");
-					i.protocol = protocols[PROTOCOL_DUMB_INCREMENT].name;
-					i.pwsi = &wsi_dumb;
-					lws_client_connect_via_info(&i);
-				}
-
-				if (!wsi_mirror && ratelimit_connects(&rl_mirror, 2u)) {
-					lwsl_notice("mirror: connecting\n");
-					i.protocol = protocols[PROTOCOL_LWS_MIRROR].name;
-					i.pwsi = &wsi_mirror;
-					wsi_mirror = lws_client_connect_via_info(&i);
-				}
-			} else
-				if (!wsi_dumb && ratelimit_connects(&rl_dumb, 2u)) {
-					lwsl_notice("http: connecting\n");
-					i.pwsi = &wsi_dumb;
-					lws_client_connect_via_info(&i);
-				}
-		}
-
-		lws_service(context, 500);
-
-		if (do_multi) {
-			m++;
-			if (m == 10) {
-				m = 0;
-				lwsl_notice("doing lws_callback_on_writable_all_protocol\n");
-				lws_callback_on_writable_all_protocol(context, &protocols[PROTOCOL_DUMB_INCREMENT]);
-			}
-		}
-	}
-
-	lwsl_err("Exiting\n");
-	lws_context_destroy(context);
-
-	return ret;
-
-usage:
-	fprintf(stderr, "Usage: libwebsockets-test-client "
-				"<server address> [--port=<p>] "
-				"[--ssl] [-k] [-v <ver>] "
-				"[-d <log bitfield>] [-l]\n");
-	return 1;
-}
-#endif
-
-int test_ws_client(char*str, int port)
-{
-	int n = 0, m, ret = 0, use_ssl = 0, ietf_version = -1;
-	unsigned int rl_dumb = 0, rl_mirror = 0, do_ws = 1, pp_secs = 0, do_multi = 0;
-	struct lws_context_creation_info info;
-	struct lws_client_connect_info i;
-	struct lws_context *context;
-	const char *prot, *p;
-	char path[300];
+	char str[100];
 	
+	strcpy(str, url);
 	memset(&info, 0, sizeof info);
 
-	lwsl_notice("libwebsockets test client - license LGPL2.1+SLE\n");
-	lwsl_notice("(C) Copyright 2010-2016 Andy Green <andy@warmcat.com>\n");
+	lws_demo_log("libwebsockets test client - license LGPL2.1+SLE");
+	lws_demo_log("(C) Copyright 2010-2016 Andy Green <andy@warmcat.com>");
 
 	memset(&i, 0, sizeof(i));
 
-	i.port = port;
 	if (lws_parse_uri(str, &prot, &i.address, &i.port, &p))
 		goto usage;
 
@@ -672,7 +257,13 @@ int test_ws_client(char*str, int port)
 	path[sizeof(path) - 1] = '\0';
 	i.path = path;
 
-	use_ssl = LCCSCF_USE_SSL;
+	lws_demo_log("%s://%s:%d%s", prot, i.address, i.port, i.path);
+
+    if (!strcmp(prot, "http") || !strcmp(prot, "ws"))
+        use_ssl = 0;
+    if (!strcmp(prot, "https") || !strcmp(prot, "wss"))
+        if (!use_ssl)
+            use_ssl = LCCSCF_USE_SSL;
 
 	/*
 	 * create the websockets context.  This tracks open connections and
@@ -687,6 +278,11 @@ int test_ws_client(char*str, int port)
 	info.gid = -1;
 	info.uid = -1;
 	info.ws_ping_pong_interval = pp_secs;
+	info.pt_serv_buf_size = 1024;
+	if( !use_ssl ){
+	info.max_http_header_pool = 1;
+	info.max_http_header_data = 1024;
+	}
 
 	if (use_ssl) {
 		info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
@@ -694,21 +290,21 @@ int test_ws_client(char*str, int port)
 	}
 
 	if (use_ssl & LCCSCF_USE_SSL)
-		lwsl_notice(" Using SSL\n");
+		lws_demo_log(" Using SSL");
 	else
-		lwsl_notice(" SSL disabled\n");
+		lws_demo_log(" SSL disabled");
 	if (use_ssl & LCCSCF_ALLOW_SELFSIGNED)
-		lwsl_notice(" Selfsigned certs allowed\n");
+		lws_demo_log(" Selfsigned certs allowed");
 	else
-		lwsl_notice(" Cert must validate correctly (use -s to allow selfsigned)\n");
+		lws_demo_log(" Cert must validate correctly (use -s to allow selfsigned)");
 	if (use_ssl & LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK)
-		lwsl_notice(" Skipping peer cert hostname check\n");
+		lws_demo_log(" Skipping peer cert hostname check");
 	else
-		lwsl_notice(" Requiring peer cert hostname matches\n");
+		lws_demo_log(" Requiring peer cert hostname matches");
 
 	context = lws_create_context(&info);
 	if (context == NULL) {
-		fprintf(stderr, "Creating libwebsocket context failed\n");
+		fprintf(stderr, "Creating libwebsocket context failed");
 		return 1;
 	}
 
@@ -720,16 +316,16 @@ int test_ws_client(char*str, int port)
 	i.client_exts = exts;
 
 	if (!strcmp(prot, "http") || !strcmp(prot, "https")) {
-		lwsl_notice("using %s mode (non-ws)\n", prot);
+		lws_demo_log("using %s mode (non-ws)", prot);
 		if (test_post) {
 			i.method = "POST";
-			lwsl_notice("POST mode\n");
+			lws_demo_log("POST mode");
 		}
 		else
 			i.method = "GET";
 		do_ws = 0;
 	} else
-		lwsl_notice("using %s mode (ws)\n", prot);
+		lws_demo_log("using %s mode (ws)", prot);
 
 	/*
 	 * sit there servicing the websocket context to handle incoming
@@ -741,55 +337,25 @@ int test_ws_client(char*str, int port)
 	 * asynchronously.
 	 */
 
-	m = 0;
 	while (!force_exit) {
-
-		if (do_multi) {
-			for (n = 0; n < ARRAY_SIZE(wsi_multi); n++) {
-				if (!wsi_multi[n] && ratelimit_connects(&rl_multi[n], 2u)) {
-					lwsl_notice("dumb %d: connecting\n", n);
-					i.protocol = protocols[PROTOCOL_DUMB_INCREMENT].name;
-					i.pwsi = &wsi_multi[n];
-					lws_client_connect_via_info(&i);
-				}
-			}
-		} else {
-
 			if (do_ws) {
-				if (!wsi_dumb && ratelimit_connects(&rl_dumb, 2u)) {
-					lwsl_notice("dumb: connecting\n");
-					i.protocol = protocols[PROTOCOL_DUMB_INCREMENT].name;
-					i.pwsi = &wsi_dumb;
+				if (!wsi_demo && ratelimit_connects(&rl_dumb, 2u)) {
+					lws_demo_log("demo: connecting");
+					i.protocol = protocols[PROTOCOL_DEMO].name;
+					i.pwsi = &wsi_demo;
 					lws_client_connect_via_info(&i);
 				}
-
-				if (!wsi_mirror && ratelimit_connects(&rl_mirror, 2u)) {
-					lwsl_notice("mirror: connecting\n");
-					i.protocol = protocols[PROTOCOL_LWS_MIRROR].name;
-					i.pwsi = &wsi_mirror;
-					wsi_mirror = lws_client_connect_via_info(&i);
-				}
-			} else
-				if (!wsi_dumb && ratelimit_connects(&rl_dumb, 2u)) {
-					lwsl_notice("http: connecting\n");
-					i.pwsi = &wsi_dumb;
+			} else {
+				if (!wsi_demo && ratelimit_connects(&rl_dumb, 2u)) {
+					lws_demo_log("http: connecting");
+					i.pwsi = &wsi_demo;
 					lws_client_connect_via_info(&i);
 				}
-		}
-
-		lws_service(context, 500);
-
-		if (do_multi) {
-			m++;
-			if (m == 10) {
-				m = 0;
-				lwsl_notice("doing lws_callback_on_writable_all_protocol\n");
-				lws_callback_on_writable_all_protocol(context, &protocols[PROTOCOL_DUMB_INCREMENT]);
 			}
-		}
+		lws_service(context, 500);
 	}
 
-	lwsl_err("Exiting\n");
+	lws_demo_log("Exiting");
 	lws_context_destroy(context);
 
 	return ret;
@@ -798,7 +364,7 @@ usage:
 	fprintf(stderr, "Usage: libwebsockets-test-client "
 				"<server address> [--port=<p>] "
 				"[--ssl] [-k] [-v <ver>] "
-				"[-d <log bitfield>] [-l]\n");
+				"[-d <log bitfield>] [-l]\r\n");
 	return 1;
 }
 

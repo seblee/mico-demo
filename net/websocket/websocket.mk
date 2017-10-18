@@ -26,5 +26,6 @@ NAME := App_websocket_client
 
 $(NAME)_SOURCES := websocket.c test-client.c
 
+#$(NAME)_INCLUDES := libraries\protocols\libwebsocket\inc libraries\protocols\libwebsocket\src 
 $(NAME)_COMPONENTS := protocols/libwebsocket
 

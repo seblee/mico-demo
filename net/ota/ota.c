@@ -35,8 +35,6 @@
 #define ota_log(M, ...) custom_log("OTA", M, ##__VA_ARGS__)
 
 static mico_semaphore_t wait_sem = NULL;
-static char ota_url[50];
-static char ota_md5[33];
 
 static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContext )
 {
@@ -45,9 +43,7 @@ static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContex
         case NOTIFY_STATION_UP:
             mico_rtos_set_semaphore( &wait_sem );
             break;
-        case NOTIFY_STATION_DOWN:
-            case NOTIFY_AP_UP:
-            case NOTIFY_AP_DOWN:
+         default:
             break;
     }
 }
@@ -70,36 +66,40 @@ static void ota_server_status_handler(OTA_STATE_E state, float progress)
     }
 }
 
-static void ota_set_url(char *pcWriteBuffer, int xWriteBufferLen,int argc, char **argv)
+static void cli_ota(char *pcWriteBuffer, int xWriteBufferLen,int argc, char **argv)
 {
-    strcpy(ota_url, argv[1]);
-}
+    if( argc < 2 ) {
+        snprintf( pcWriteBuffer, xWriteBufferLen, "Please specify a correct operation: [start | pause | resume | stop ] ");
+        return;
+    }
 
-static void ota_set_md5(char *pcWriteBuffer, int xWriteBufferLen,int argc, char **argv)
-{
-    strcpy(ota_md5, argv[1]);
-}
-
-static void ota_server_option(char *pcWriteBuffer, int xWriteBufferLen,int argc, char **argv)
-{
-    if( !strcmp(argv[1], "start") ){
-        ota_server_start(ota_url, ota_md5, ota_server_status_handler);
-    }else if( !strcmp(argv[1], "pause") ){
+    if ( strcmp( argv[1], "start") == 0) {
+        if ( argc < 3 ) {
+            snprintf( pcWriteBuffer, xWriteBufferLen, "Please specify a correct URL");
+            return;
+        }
+        snprintf( pcWriteBuffer, xWriteBufferLen, "OTA from server %s", argv[2]);
+        ota_server_start(argv[2], (argc >= 4)? argv[3]:NULL, ota_server_status_handler);
+    }
+    else if ( strcmp( argv[1], "pause") == 0 ) {
+        snprintf( pcWriteBuffer, xWriteBufferLen, "Pause...");
         ota_server_pause();
-    }else if( !strcmp(argv[1], "continue") ){
+    }
+    else if ( strcmp( argv[1], "resume") == 0 ) {
+        snprintf( pcWriteBuffer, xWriteBufferLen, "Continue...");
         ota_server_continue();
-    }else if( !strcmp(argv[1], "stop") ){
+    }
+    else if ( strcmp( argv[1], "stop") == 0 ) {
+        snprintf( pcWriteBuffer, xWriteBufferLen, "Stop...");
         ota_server_stop();
     }
 }
 
 static const struct cli_command ota_clis[] = {
-    {"ota_url", "set ota server download url", ota_set_url},
-    {"ota_md5", "set update file check", ota_set_md5},
-    {"ota_op", "ota server option", ota_server_option},
+    {"otad", "ota [start | pause | resume | stop ] [url] <md5>, Download OTA data from [url], check <md5> if available, and replace current firmware", cli_ota},
 };
 
-int application_start( void )
+int main( void )
 {
     OSStatus err = kNoErr;
 
@@ -117,14 +117,12 @@ int application_start( void )
 
     /* Wait for wlan connection*/
     mico_rtos_get_semaphore( &wait_sem, MICO_WAIT_FOREVER );
-    ota_log( "wifi connected successful" );
+    ota_log( "wifi connected successful, input \"help\" for useful commands." );
 
     cli_register_commands(ota_clis, sizeof(ota_clis)/sizeof(struct cli_command));
 
-    exit:
-    if ( wait_sem != NULL )
-        mico_rtos_deinit_semaphore( &wait_sem );
-    mico_rtos_delete_thread( NULL );
+exit:
+    if ( wait_sem ) mico_rtos_deinit_semaphore( &wait_sem );
     return err;
 }
 

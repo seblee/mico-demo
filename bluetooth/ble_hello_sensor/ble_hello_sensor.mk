@@ -28,4 +28,4 @@ $(NAME)_SOURCES := ble_hello_sensor.c
 $(NAME)_COMPONENTS := daemons/bt_smart \
 				      bluetooth/low_energy
 				      
-GLOBAL_DEFINES := QC_TEST_BLUETOOTH_ENABLE
+GLOBAL_DEFINES := QC_TEST_BLUETOOTH_ENABLE USE_MiCOKit_EXT

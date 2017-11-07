@@ -258,7 +258,7 @@ static void wifi_manager_scan_complete_cb(ScanResult_adv *pApList, void* arg)
 
     *(p++) = EOC_WIFI_MANAGER_CMD_SCAN_SSID;
 
-    sprintf((char *)p, "%d", pApList->ApList[i].ApPower);
+    sprintf((char *)p, "%d", pApList->ApList[i].rssi);
     p += strlen( (char *)p);
 
     *(p++) = EOC_WIFI_MANAGER_CMD_SCAN_SIGNAL;

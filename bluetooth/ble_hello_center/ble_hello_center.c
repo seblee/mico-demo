@@ -156,7 +156,7 @@ static OSStatus disconnection_handler           ( mico_bt_smartbridge_socket_t* 
 static OSStatus notification_handler            ( mico_bt_smartbridge_socket_t* socket, uint16_t attribute_handle );
 static OSStatus scan_complete_handler           ( void *arg );
 static OSStatus scan_result_handler             ( const mico_bt_smart_advertising_report_t* result );
-static OSStatus sensor_trigger_handler_t        ( void *arg );
+static OSStatus hello_sensor_trigger_handler        ( void *arg );
 
 /* Remote device list management */
 static OSStatus connect_list_init   ( void );
@@ -239,7 +239,7 @@ int application_start(void)
 
     mico_rtos_create_worker_thread( &hello_sensor_color_toggle_worker_thread, MICO_APPLICATION_PRIORITY, 1024, 1 );
 
-    mico_rtos_register_timed_event( &hello_sensor_color_toggle_event, &hello_sensor_color_toggle_worker_thread, sensor_trigger_handler_t, 1000, NULL );
+    mico_rtos_register_timed_event( &hello_sensor_color_toggle_event, &hello_sensor_color_toggle_worker_thread, hello_sensor_trigger_handler, 1000, NULL );
 
     mico_bt_app_log("Scanning for %s...\n", desired_peer_device);
 
@@ -258,7 +258,7 @@ exit:
   return err;
 }
 
-OSStatus sensor_trigger_handler_t(void *arg)
+OSStatus hello_sensor_trigger_handler(void *arg)
 {
     UNUSED_PARAMETER(arg);
     uint32_t i;

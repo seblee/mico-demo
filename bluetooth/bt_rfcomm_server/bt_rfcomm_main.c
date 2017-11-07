@@ -186,7 +186,7 @@ bt_server_management_cback(mico_bt_management_evt_t event,
         break;
 
     case BTM_PAIRING_IO_CAPABILITIES_BR_EDR_REQUEST_EVT:        
-        p_event_data->pairing_io_capabilities_br_edr_request.local_io_cap  = BTM_IO_CAPABILIES_DISPLAY_ONLY;
+        p_event_data->pairing_io_capabilities_br_edr_request.local_io_cap  = BTM_IO_CAPABILITIES_DISPLAY_ONLY;
         p_event_data->pairing_io_capabilities_br_edr_request.oob_data      = BTM_OOB_NONE;
         p_event_data->pairing_io_capabilities_br_edr_request.auth_req      = 5;//BTM_AUTH_SPGB_YES;//BTM_LE_AUTH_REQ_BOND | BTM_LE_AUTH_REQ_MITM;
         p_event_data->pairing_io_capabilities_br_edr_request.is_orig       = FALSE;
@@ -199,7 +199,7 @@ bt_server_management_cback(mico_bt_management_evt_t event,
 
     case BTM_USER_CONFIRMATION_REQUEST_EVT:
         /* User confirmation request for pairing */
-        mico_bt_app_log("User confirmation request: numeric = %d, %s", 
+        mico_bt_app_log("User confirmation request: numeric = %lu, %s", 
                         p_event_data->user_confirmation_request.numeric_value, 
                         p_event_data->user_confirmation_request.just_works == MICO_TRUE ? "Just works" : "Not just works");
         
@@ -241,7 +241,7 @@ static void printf_key_data( char *name, uint8_t *p_data, uint16_t len )
 
 static void printf_key_number( char *name, uint32_t number )
 {
-    printf("    %s:%d\r\n", name, number);
+    printf("    %s:%lu\r\n", name, number);
 }
 
 static void paired_list ( void )

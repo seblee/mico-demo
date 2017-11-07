@@ -33,61 +33,34 @@
 
 #define dns_log(M, ...) custom_log("DNS", M, ##__VA_ARGS__)
 
-static mico_semaphore_t wait_sem = NULL;
 static char *domain = "www.baidu.com";
 
-static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContext )
-{
-    switch ( status )
-    {
-        case NOTIFY_STATION_UP:
-            if ( wait_sem != NULL ) mico_rtos_set_semaphore( &wait_sem );
-            break;
-        case NOTIFY_STATION_DOWN:
-            case NOTIFY_AP_UP:
-            case NOTIFY_AP_DOWN:
-            break;
-    }
-}
-
-int application_start( void )
+int main( void )
 {
     OSStatus err = kNoErr;
     char **pptr = NULL;
     struct hostent* host = NULL;
     struct in_addr in_addr;
 
-    mico_rtos_init_semaphore( &wait_sem, 1 );
-
-    /*Register user function for MiCO nitification: WiFi status changed */
-    err = mico_system_notify_register( mico_notify_WIFI_STATUS_CHANGED,
-                                       (void *) micoNotify_WifiStatusHandler,
-                                       NULL );
-    require_noerr( err, exit );
-
     /* Start MiCO system functions according to mico_config.h*/
     err = mico_system_init( mico_system_context_init( 0 ) );
     require_noerr( err, exit );
 
-    /* Wait for wlan connection*/
-    mico_rtos_get_semaphore( &wait_sem, MICO_WAIT_FOREVER );
-    dns_log( "wifi connected successful" );
+    while ( 1 ) {
+        /* Resolve DNS address */
+        dns_log( "Requesting server address..." );
+        host = gethostbyname( domain );
+        require_action_quiet( host != NULL, exit, err = kNotFoundErr );
 
-    /* Resolve DNS address */
-
-    host = gethostbyname( domain );
-    require_action_quiet( host != NULL, exit, err = kNotFoundErr);
-
-    pptr=host->h_addr_list;
-    for(; *pptr!=NULL; pptr++){
-        in_addr.s_addr = *(uint32_t *)(*pptr);
-        dns_log( "%s ip address:%s", domain, inet_ntoa(in_addr));
+        pptr = host->h_addr_list;
+        for ( ; *pptr != NULL; pptr++ ) {
+            in_addr.s_addr = *(uint32_t *) (*pptr);
+            dns_log( "%s ip address: %s", domain, inet_ntoa(in_addr));
+        }
+        mico_rtos_delay_milliseconds( 2000 );
     }
 
-    exit:
-    if ( wait_sem != NULL )
-        mico_rtos_deinit_semaphore( &wait_sem );
-    mico_rtos_delete_thread( NULL );
+exit:
     return err;
 }
 

@@ -34,7 +34,7 @@
 #define PROTOCOL            "com.mxchip.spp"
 
 /* Wi-Fi configuration mode */
-#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_EASYLINK_WITH_SOFTAP
+#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_AWS
 
 /*User provided configurations*/
 #define CONFIGURATION_VERSION               0x00000002 // if default configuration is changed, update this number

@@ -51,7 +51,7 @@
 #define MICO_WLAN_CONNECTION_ENABLE
 #endif
 
-#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_EASYLINK_WITH_SOFTAP
+#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_AWS
 
 #define EasyLink_TimeOut                60000 /**< EasyLink timeout 60 seconds. */
 

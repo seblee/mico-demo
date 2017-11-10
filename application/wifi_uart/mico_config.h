@@ -49,7 +49,7 @@
  * Enable wlan connection, start easylink configuration if no wlan settings are existed */
 #define MICO_WLAN_CONNECTION_ENABLE
 
-#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_EASYLINK
+#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_AWS
 
 #define MICO_WLAN_CONFIG_MODE_TRIGGER  CONFIG_MODE_TRIGGER_AUTO
 

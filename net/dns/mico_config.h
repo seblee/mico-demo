@@ -11,6 +11,8 @@
 #ifndef __MICO_CONFIG_H
 #define __MICO_CONFIG_H
 
+//#define CONFIG_MDNS_DEBUG                      MICO_DEBUG_ON
+#define MICO_WLAN_CONNECTION_ENABLE             0
 
 
 #endif

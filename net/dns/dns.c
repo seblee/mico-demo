@@ -42,10 +42,12 @@ int main( void )
     struct hostent* host = NULL;
     struct in_addr in_addr;
 
+    //mico_network_switch_interface_manual(INTERFACE_ETH);
+    
     /* Start MiCO system functions according to mico_config.h*/
     err = mico_system_init( mico_system_context_init( 0 ) );
     require_noerr( err, exit );
-
+    
     while ( 1 ) {
         /* Resolve DNS address */
         dns_log( "Requesting server address..." );

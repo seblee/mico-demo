@@ -36,7 +36,7 @@
 
 static mico_semaphore_t wait_sem = NULL;
 extern int http2_client_main(char *url);
-#define HTTP2_SERVER_URI  "https://nghttp2.org/"
+#define HTTP2_SERVER_URI  "https://dueros-h2.baidu.com/dcs/v1/directives"
 
 static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContext )
 {

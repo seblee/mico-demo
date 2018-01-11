@@ -149,10 +149,16 @@ static ssize_t send_callback(nghttp2_session *session, const uint8_t *data,
 
   connection = (struct Connection *)user_data;
   connection->want_io = IO_NONE;
+
   rv = ssl_send(connection->ssl, data, (int)length);
   if (rv <= 0) {
-    rv = NGHTTP2_ERR_CALLBACK_FAILURE;
-  }
+    rv = ssl_get_error(connection->ssl, rv);
+    if (rv == 3 || rv == 6) {
+        rv = NGHTTP2_ERR_WOULDBLOCK;
+    } else {
+        rv = NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+  } 
   return rv;
 }
 
@@ -172,11 +178,14 @@ static ssize_t recv_callback(nghttp2_session *session, uint8_t *buf,
   connection = (struct Connection *)user_data;
   connection->want_io = IO_NONE;
   rv = ssl_recv(connection->ssl, buf, (int)length);
-  if (rv < 0) {
-    rv = NGHTTP2_ERR_CALLBACK_FAILURE;
-  } else if (rv == 0) {
-    rv = NGHTTP2_ERR_EOF;
-  }
+  if (rv <= 0) {
+    rv = ssl_get_error(connection->ssl, rv);
+    if (rv == 2 || rv == 6) {
+        rv = NGHTTP2_ERR_WOULDBLOCK;
+    } else {
+        rv = NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+  } 
   return rv;
 }
 
@@ -380,9 +389,10 @@ static void submit_request(struct Connection *connection, struct Request *req) {
   const nghttp2_nv nva[] = {MAKE_NV(":method", "GET"),
                             MAKE_NV_CS(":path", req->path),
                             MAKE_NV(":scheme", "https"),
-                            MAKE_NV_CS(":authority", req->hostport),
-                            MAKE_NV("accept", "*/*"),
-                            MAKE_NV("user-agent", "nghttp2/" NGHTTP2_VERSION)};
+                            MAKE_NV("host", "dueros-h2.baidu.com"),
+                            MAKE_NV_CS("authorization", req->hostport),
+                            MAKE_NV("dueros-device-id", "123"),
+                           };
 
   stream_id = nghttp2_submit_request(connection->session, NULL, nva,
                                      sizeof(nva) / sizeof(nva[0]), NULL, req);
@@ -483,10 +493,20 @@ static void fetch_uri(const struct URI *uri) {
   /* Submit the HTTP request to the outbound queue. */
   submit_request(&connection, &req);
 
-  while((nghttp2_session_want_read(connection.session)) || 
-         (nghttp2_session_want_write(connection.session))) {
-    exec_io(&connection);
+  while( 1 ) {
     
+    if (nghttp2_session_want_write(connection.session)) {
+        rv = nghttp2_session_send(connection.session);
+        if (rv != 0) {
+          diec("nghttp2_session_send", rv);
+        }
+    }
+    if (nghttp2_session_want_read(connection.session)) {
+        rv = nghttp2_session_recv(connection.session);
+        if (rv != 0) {
+          diec("nghttp2_session_recv", rv);
+        }
+    }
   }
   
   /* Resource cleanup */
@@ -588,6 +608,9 @@ int http2_client_main(char *url) {
   if (rv != 0) {
     die("parse_uri failed");
   }
+
+  uri.hostport = "Bearer 26.f7acfc53a494b599b2280a60188273b3.2592000.1516349054.890415133-10317421";
+  uri.hostportlen = strlen(uri.hostport);
   fetch_uri(&uri);
   return EXIT_SUCCESS;
 }

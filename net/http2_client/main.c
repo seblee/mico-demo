@@ -36,7 +36,7 @@
 
 static mico_semaphore_t wait_sem = NULL;
 extern int http2_client_main(char *url);
-#define HTTP2_SERVER_URI  "https://dueros-h2.baidu.com/dcs/v1/directives"
+#define HTTP2_SERVER_URI  "https://dueros-h2.baidu.com"
 
 static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContext )
 {
@@ -52,12 +52,17 @@ static void micoNotify_WifiStatusHandler( WiFiEvent status, void* const inContex
     }
 }
 
+void ssl_log( const int logLevel, const char * const logMessage )
+{
+    tcp_client_log("%s\r\n", logMessage);
+}
+
 int application_start( void )
 {
     OSStatus err = kNoErr;
 
     mico_rtos_init_semaphore( &wait_sem, 1 );
-
+    //ssl_set_loggingcb(ssl_log);
     /*Register user function for MiCO nitification: WiFi status changed */
     err = mico_system_notify_register( mico_notify_WIFI_STATUS_CHANGED,
                                        (void *) micoNotify_WifiStatusHandler, NULL );

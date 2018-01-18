@@ -58,6 +58,12 @@ enum { IO_NONE, WANT_READ, WANT_WRITE };
         NGHTTP2_NV_FLAG_NONE                                                   \
   }
 
+#define WXLIB_MAKE_NV(NAME, VALUE)                                    \
+  {                                                                    \
+    (uint8_t *)NAME, (uint8_t *)VALUE, strlen(NAME), strlen(VALUE),    \
+        NGHTTP2_NV_FLAG_NONE                                           \
+  }
+
 /** Flag indicating receive stream is reset */
 #define DATA_RECV_RST_STREAM      1
 /** Flag indicating frame is completely received  */
@@ -183,7 +189,7 @@ static int do_ssl_connect(struct Connection *hd, int sockfd, const char *hostnam
     mico_ssl_t ssl;
 
     ssl_set_alpn_list(HTTP2_ALPN_LIST);
-    ssl = ssl_connect_sni(sockfd, 0, NULL, &hostname,&rv);
+    ssl = ssl_connect_sni(sockfd, 0, NULL, hostname, &rv);
     if (ssl == NULL) {
     dief("SSL_new", "error");
     }
@@ -314,7 +320,7 @@ static ssize_t recv_callback(nghttp2_session *session, uint8_t *buf,
       rv = NGHTTP2_ERR_EOF;
   }
   printf("[recv_callback] lenght=%d rv=%d, err %d, ret %d\r\n",  length, rv, err, ret);
-  //printf("[recv_callback] buffer here\r\n %s\r\n", buf);
+  printf("[recv_callback] buffer here\r\n %s\r\n", buf);
   return rv;
 }
 
@@ -530,12 +536,13 @@ static int connect_to(const char *host, uint16_t port) {
 static void submit_request(struct Connection *connection, struct Request *req) {
   int32_t stream_id;
   /* Make sure that the last item is NULL */
-  const nghttp2_nv nva[] = {MAKE_NV(":method", "GET"),
-                            MAKE_NV(":path", "/dcs/v1/directives"),
-                            MAKE_NV(":scheme", "https"),
-                            MAKE_NV("host", "dueros-h2.baidu.com"),
-                            MAKE_NV("authorization", ACCESS_TOKEN),
-                            MAKE_NV("dueros-device-id", "123"),
+  const nghttp2_nv nva[] = {
+                            WXLIB_MAKE_NV(":method", "GET"),
+                            WXLIB_MAKE_NV(":path", "/dcs/v1/directives"),
+                            WXLIB_MAKE_NV(":scheme", "https"),
+                            WXLIB_MAKE_NV("host", "dueros-h2.baidu.com"),
+                            WXLIB_MAKE_NV("authorization", ACCESS_TOKEN),
+                            WXLIB_MAKE_NV("dueros-device-id", "123"),
                            };
 
   stream_id = nghttp2_submit_request(connection->session, NULL, nva,
@@ -547,6 +554,20 @@ static void submit_request(struct Connection *connection, struct Request *req) {
 
   req->stream_id = stream_id;
   printf("[INFO] %d Stream ID = %d\n", __LINE__, stream_id);
+}
+
+int handle_get_response(struct Connection *handle, const char *data, size_t len, int flags)
+{
+    if (len) {
+        printf("[get-response] %.*s\n", len, data);
+    }
+    if (flags == DATA_RECV_FRAME_COMPLETE) {
+        printf("[get-response] Frame fully received\n");
+    }
+    if (flags == DATA_RECV_RST_STREAM) {
+        printf("[get-response] Stream Closed\n");
+    }
+    return 0;
 }
 
 int handle_echo_response(struct Connection *handle, const char *data, size_t len, int flags)
@@ -618,6 +639,20 @@ ssize_t WXlib_data_provider_cb(nghttp2_session *session, int32_t stream_id, uint
     struct Connection *h2 = user_data;
     WXlib_putpost_data_cb_t data_cb = source->ptr;
     return (*data_cb)(h2, (char *)buf, length, data_flags);
+}
+
+int WXlib_do_get_with_nv(struct Connection *hd, const nghttp2_nv *nva, size_t nvlen,
+                              WXlib_frame_data_recv_cb_t recv_cb,
+                              struct Request *req)
+{
+    int stream_id = nghttp2_submit_request(hd->session, NULL, nva, nvlen, NULL, recv_cb);
+
+    if (stream_id < 0) {
+        diec("nghttp2_submit_request", stream_id);
+      }
+
+      req->stream_id = stream_id;
+      printf("[INFO] %d Stream ID = %d\n", __LINE__, stream_id);
 }
 
 int WXlib_do_putpost_with_nv(struct Connection *hd, const nghttp2_nv *nva, size_t nvlen,
@@ -856,6 +891,7 @@ static void run_progress(const struct URI uri) {
     printf("Connecting to server\n");
     struct Connection connection;
     struct Request req;
+    request_init(&req, &uri);
     if (WXlib_connect(&connection, uri) != 0) {
     printf("Failed to connect\n");
         return;
@@ -864,18 +900,36 @@ static void run_progress(const struct URI uri) {
 
 
   /* Submit the HTTP request to the outbound queue. */
-  submit_request(&connection, &req);
+//  submit_request(&connection, &req);
+
+    const nghttp2_nv nva_get_connect[] = {
+                                WXLIB_MAKE_NV(":method", "GET"),
+                                WXLIB_MAKE_NV(":path", "/dcs/v1/directives"),
+                                WXLIB_MAKE_NV(":scheme", "https"),
+                                WXLIB_MAKE_NV("host", "dueros-h2.baidu.com"),
+                                WXLIB_MAKE_NV("authorization", ACCESS_TOKEN),
+                                WXLIB_MAKE_NV("dueros-device-id", "123"),
+                            };
+
+  WXlib_do_get_with_nv(&connection, nva_get_connect,
+                sizeof(nva_get_connect)/sizeof(nva_get_connect[0]),
+                handle_get_response,
+                &req);
 
 
   const nghttp2_nv nva_post_voice[] = {
-                              MAKE_NV(":method", "POST"),
-                              MAKE_NV(":path", "/dcs/v1/events"),
-                              MAKE_NV(":scheme", "https"),
-                              MAKE_NV("host", "dueros-h2.baidu.com"),
-                              MAKE_NV("authorization", ACCESS_TOKEN),
-                              MAKE_NV("dueros-device-id", "123"),
-                              MAKE_NV("content-type", "multipart/form-data; boundary=this-is-a-boundary"),
+                              WXLIB_MAKE_NV(":method", "POST"),
+                              WXLIB_MAKE_NV(":path", "/dcs/v1/events"),
+                              WXLIB_MAKE_NV(":scheme", "https"),
+                              WXLIB_MAKE_NV("host", "dueros-h2.baidu.com"),
+                              WXLIB_MAKE_NV("authorization", ACCESS_TOKEN),
+                              WXLIB_MAKE_NV("dueros-device-id", "123"),
+                              WXLIB_MAKE_NV("content-type", "multipart/form-data; boundary=this-is-a-boundary"),
                            };
+
+  uint32_t start_time = 0;
+
+  start_time = mico_rtos_get_time();
 
   WXlib_do_putpost_with_nv(&connection, nva_post_voice,
           sizeof(nva_post_voice)/sizeof(nva_post_voice[0]),
@@ -1011,3 +1065,4 @@ int http2_client_main(char *url) {
   run_progress(uri);
   return EXIT_SUCCESS;
 }
+

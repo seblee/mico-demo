@@ -42,7 +42,13 @@ int application_start( void )
 
   tcpip_init(NULL, NULL);
 
-  mico_rtos_create_thread(NULL ,MICO_APPLICATION_PRIORITY - 1, "pppos client", pppos_client_thread, 8192, NULL);
+  mico_rtos_create_thread(NULL ,MICO_APPLICATION_PRIORITY - 1, "pppos client", pppos_client_thread, 1024, NULL);
+
+  for(;;)
+  {
+    log("MiCO tick ----------------");
+    mico_rtos_delay_milliseconds(1000);
+  }
 
   return 0;
 }

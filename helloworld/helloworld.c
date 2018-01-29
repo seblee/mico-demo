@@ -101,17 +101,23 @@ static void daytime_thread(void *arg)
 
 int application_start( void )
 {
-  mico_rtos_init_semaphore(&conn_sem, 1);
-  mico_system_notify_register( mico_notify_GPRS_STATUS_CHANGED, clientNotify_GPRSStatusHandler, NULL );
-  cli_init();
-  MicoInit();
+    mico_rtos_init_semaphore(&conn_sem, 1);
+    mico_system_notify_register( mico_notify_GPRS_STATUS_CHANGED, clientNotify_GPRSStatusHandler, NULL );
+    cli_init();
+    MicoInit();
 
-  log("Opening GPRS ...");
-  mico_gprs_open();
-  mico_rtos_get_semaphore(&conn_sem, MICO_WAIT_FOREVER);
-  log("Open GPRS success");
+    log("Opening GPRS ...");
+    mico_gprs_open();
+    mico_rtos_get_semaphore(&conn_sem, MICO_WAIT_FOREVER);
+    log("Open GPRS success");
 
-  mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "DayTime", daytime_thread, 2 * 1024, NULL);
+    #if 0
+    mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "DayTime", daytime_thread, 2 * 1024, NULL);
+    #else
+    static uint32_t addr;
+    addr = inet_addr("115.239.211.112");
+    ping_init(&addr);
+    #endif
 
-  return 0;
+    return 0;
 }

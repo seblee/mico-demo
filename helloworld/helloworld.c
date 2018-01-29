@@ -32,92 +32,22 @@
 
 #include "mico.h"
 
-#define log(format, ...)  custom_log("demo", format, ##__VA_ARGS__)
-
-static mico_semaphore_t conn_sem;
-
-void clientNotify_GPRSStatusHandler(int event, void* arg )
-{
-  switch (event) 
-  {
-  case NOTIFY_STATION_UP:
-    mico_rtos_set_semaphore(&conn_sem);
-    break;
-  case NOTIFY_STATION_DOWN:
-    break;
-  default:
-    break;
-  }
-}
-
-static void daytime_thread(void *arg)
-{
-    int					sockfd, n;
-    static char				recvline[256];
-    struct sockaddr_in	servaddr;
-
-    bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port   = htons(13);	/* daytime server */
-    servaddr.sin_addr.s_addr = inet_addr("128.138.141.172");
-
-    for(;;)
-    {
-        if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        {
-            log("socket error");
-            break;
-        }
-
-        log("connecting ...");
-
-        if (connect(sockfd, &servaddr, sizeof(servaddr)) < 0)
-        {
-            log("connect error");
-            close(sockfd);
-            break;
-        }
-
-        while ( (n = read(sockfd, recvline, sizeof(recvline))) > 0) 
-        {
-            recvline[n] = 0;	/* null terminate */
-            log("================================================================");
-            log("%s", recvline);
-            log("================================================================");
-        }
-
-        if (n < 0)
-        {
-            log("read error");
-        }
-
-        close(sockfd);
-
-        mico_rtos_delay_milliseconds(10000);
-    }
-
-    mico_rtos_delete_thread(NULL);
-}
+#define os_helloworld_log(format, ...)  custom_log("helloworld", format, ##__VA_ARGS__)
 
 int application_start( void )
 {
-    mico_rtos_init_semaphore(&conn_sem, 1);
-    mico_system_notify_register( mico_notify_GPRS_STATUS_CHANGED, clientNotify_GPRSStatusHandler, NULL );
-    cli_init();
-    MicoInit();
+  /* Start MiCO system functions according to mico_config.h*/
+  mico_system_init( mico_system_context_init( 0 ) );
+  
+  /* Output on debug serial port */
+  os_helloworld_log( "Hello world!" );
 
-    log("Opening GPRS ...");
-    mico_gprs_open();
-    mico_rtos_get_semaphore(&conn_sem, MICO_WAIT_FOREVER);
-    log("Open GPRS success");
-
-    #if 0
-    mico_rtos_create_thread(NULL, MICO_APPLICATION_PRIORITY, "DayTime", daytime_thread, 2 * 1024, NULL);
-    #else
-    static uint32_t addr;
-    addr = inet_addr("115.239.211.112");
-    ping_init(&addr);
-    #endif
-
-    return 0;
+  /* Trigger MiCO system led available on most MiCOKit */
+  while(1)
+  {
+      MicoGpioOutputTrigger( MICO_SYS_LED );
+      mico_thread_sleep(1);
+  }
 }
+
+

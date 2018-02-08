@@ -112,9 +112,9 @@ mico-demos
 
 ### 使用前准备
 1. 首先您需要安装 [mico-cube](https://code.aliyun.com/mico/mico-cube).
-2. 安装MiCoder IDE集成开发环境，下载地址：[MiCoder IDE](http://developer.mico.io/downloads/2).
+2. 安装MiCoder IDE集成开发环境，下载地址：[MiCoder IDE](http://developer.mxchip.com/downloads/2).
 3. 准备一个Jlink下载调试工具(针对ST开发板，可使用Stlink)，并在PC上安装Jlink驱动软件.
-4. 连接Jlink工具到PC端，并更新驱动程序，具体方法参考：[MiCO SDK 使用](http://developer.mico.io/docs/10)页面中步骤 1.
+4. 连接Jlink工具到PC端，并更新驱动程序，具体方法参考：[MiCO SDK 使用](http://developer.mxchip.com/docs/10)页面中步骤 1.
 5. 使用USB线连接PC和MiCOKit，实现一个虚拟串口用于供电和输出调试信息, 驱动下载地址：[VCP driver](http://www.ftdichip.com/Drivers/VCP.htm).
 
 ### 工程导入，编译及下载，调试
